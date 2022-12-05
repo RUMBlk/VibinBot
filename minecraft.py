@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from datetime import datetime
 from mcstatus import JavaServer
 from mcstatus import BedrockServer
