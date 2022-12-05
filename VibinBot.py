@@ -1,10 +1,5 @@
 import os
 import discord
-from dropbox.async_ import LaunchResultBase
-from mcstatus import JavaServer
-from mcstatus import BedrockServer
-from datetime import datetime, timezone
-from discord.ext import tasks
 from dotenv import load_dotenv, find_dotenv
 import traceback
 import os.path
