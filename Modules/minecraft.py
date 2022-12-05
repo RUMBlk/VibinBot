@@ -3,6 +3,7 @@ from datetime import datetime
 from mcstatus import JavaServer
 from mcstatus import BedrockServer
 import discord
+from discord.ext import commands
 from Modules.database import *
 
 class servers(BaseModel):
@@ -46,7 +47,7 @@ async def compile_embed(server, ip, edition, version):
     return embed
 
 #Discord
-class commands(commands.Cog):
+class mc_cmd(commands.Cog):
     bot = discord.Bot()
     def __init__(self, bot, debug=False):
         self.bot = bot

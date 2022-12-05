@@ -9,6 +9,7 @@ class Bot(object):
         @bot.event
         async def on_connect():
             bot.add_cog(cmd(bot, debug))
+            bot.add_cog(mc.mc_cmd(bot, debug))
             await bot.sync_commands()
 
         @bot.event
