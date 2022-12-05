@@ -1,7 +1,7 @@
 import discord
-from Modules.database import *
+from database import *
 import traceback
-import Modules.minecraft as mc
+import minecraft as mc
 from discord.ext import tasks, commands
 
 class Bot(object):

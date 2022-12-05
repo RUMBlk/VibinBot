@@ -23,33 +23,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Modules\database.py" />
-    <Compile Include="Modules\discord.py" />
-    <Compile Include="Modules\minecraft.py" />
-    <Compile Include="Modules\storage.py" />
-    <Compile Include="Modules\__init__.py" />
+    <Compile Include="database.py" />
+    <Compile Include="minecraft.py" />
+    <Compile Include="storage.py" />
+    <Compile Include="VB_discord.py" />
     <Compile Include="VibinBot.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Modules\" />
-    <Folder Include="Modules\__pycache__\" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include=".env" />
-    <Content Include="Modules\__pycache__\database.cpython-310.pyc" />
-    <Content Include="Modules\__pycache__\database.cpython-311.pyc" />
-    <Content Include="Modules\__pycache__\database.cpython-39.pyc" />
-    <Content Include="Modules\__pycache__\dbxStorage.cpython-310.pyc" />
-    <Content Include="Modules\__pycache__\discord.cpython-39.pyc" />
-    <Content Include="Modules\__pycache__\minecraft.cpython-310.pyc" />
-    <Content Include="Modules\__pycache__\minecraft.cpython-311.pyc" />
-    <Content Include="Modules\__pycache__\minecraft.cpython-39.pyc" />
-    <Content Include="Modules\__pycache__\storage.cpython-310.pyc" />
-    <Content Include="Modules\__pycache__\storage.cpython-311.pyc" />
-    <Content Include="Modules\__pycache__\storage.cpython-39.pyc" />
-    <Content Include="Modules\__pycache__\__init__.cpython-310.pyc" />
-    <Content Include="Modules\__pycache__\__init__.cpython-311.pyc" />
-    <Content Include="Modules\__pycache__\__init__.cpython-39.pyc" />
     <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>

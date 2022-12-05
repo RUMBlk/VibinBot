@@ -4,7 +4,7 @@ from mcstatus import JavaServer
 from mcstatus import BedrockServer
 import discord
 from discord.ext import commands
-from Modules.database import *
+from database import *
 
 class servers(BaseModel):
     id = PrimaryKeyField()
