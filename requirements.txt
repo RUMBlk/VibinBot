@@ -19,6 +19,7 @@ multidict==6.0.2
 peewee==3.15.4
 pip==22.0.4
 ply==3.11
+psycopg2==2.9.5
 py-cord==2.0.0
 pyjsparser==2.7.1
 pyodbc==4.0.34
