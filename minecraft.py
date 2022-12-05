@@ -58,8 +58,8 @@ class mc_cmd(commands.Cog):
 
         response = await ctx.respond(content="Please wait for the next status update, usually it doesn't takes more than 1 minute.")
         message = await response.original_message()
-        server = mc.servers.get_or_create(IP = ip, edition = edition, online = False, version = "Unknown")[0]
-        mc.legacy.create(MessageID = message.id, type = "update", ChannelID = ctx.channel.id, IP = server.id, edition = edition)
+        server = servers.get_or_create(IP = ip, edition = edition, online = False, version = "Unknown")[0]
+        legacy.create(MessageID = message.id, type = "update", ChannelID = ctx.channel.id, IP = server.id, edition = edition)
 
     @bot.slash_command(description = "Sets channel for mc server status notifications")
     async def setnotification(self, ctx, ip, edition = 'JAVA', sub_role = ''):
@@ -68,8 +68,8 @@ class mc_cmd(commands.Cog):
             edition = edition.upper()
 
         response = await ctx.respond(content=f"Notifications for [{edition[0][0]}]{ip} status set!")
-        server = mc.servers.get_or_create(IP = ip, edition = edition, online = False, version = "Unknown")[0]
-        mc.legacy.create(type = "notify", ChannelID = ctx.channel.id, edition = edition, IP = server.id, role = sub_role)
+        server = servers.get_or_create(IP = ip, edition = edition, online = False, version = "Unknown")[0]
+        legacy.create(type = "notify", ChannelID = ctx.channel.id, edition = edition, IP = server.id, role = sub_role)
 
     @bot.slash_command(description = "Removes mc server status notifications for this channel.")
     async def stopnotification(self, ctx, ip, edition = 'JAVA', sub_role = ''):
@@ -77,7 +77,7 @@ class mc_cmd(commands.Cog):
         if role in ctx.author.roles:
             edition = edition.upper()
             try:
-                mc.legacy.get(mc.legacy.ChannelID == ctx.channel.id, mc.legacy.type == "notify").delete_instance()
+                legacy.get(legacy.ChannelID == ctx.channel.id, legacy.type == "notify").delete_instance()
                 content = "Record deleted"
             except: content = "not found"
             await ctx.respond(content)
