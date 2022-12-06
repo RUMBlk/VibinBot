@@ -5,6 +5,7 @@ import traceback
 import os.path
 from database import *
 import VB_discord
+import keepalive
 
 debug = False
 debug_guild=None

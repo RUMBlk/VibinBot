@@ -25,6 +25,7 @@
   <ItemGroup>
     <Compile Include="database.py" />
     <Compile Include="minecraft.py" />
+    <Compile Include="keepalive.py" />
     <Compile Include="storage.py" />
     <Compile Include="VB_discord.py" />
     <Compile Include="VibinBot.py" />
