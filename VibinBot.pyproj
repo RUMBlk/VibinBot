@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b8979bca-36b1-4026-9b46-d9844044480a</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>VibinBot.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -28,7 +28,7 @@
     <Compile Include="keepalive.py" />
     <Compile Include="storage.py" />
     <Compile Include="VB_discord.py" />
-    <Compile Include="VibinBot.py" />
+    <Compile Include="main.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".env" />

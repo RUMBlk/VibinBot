@@ -1,8 +1,10 @@
+from minecraft import servers
 import discord
 from database import *
 import traceback
 import minecraft as mc
 from discord.ext import tasks, commands
+from datetime import datetime
 
 class Bot(object):
     def __init__(self, bot, delay, bot_token, debug=False):
@@ -14,7 +16,24 @@ class Bot(object):
 
         @bot.event
         async def on_guild_join(guild):
-            guilds(GuildID = guild.id)
+            guilds.get_or_create(GuildID = guild.id)
+
+        @bot.event
+        async def on_message(message):
+            if message.author.bot is False:
+                guild = guilds.get(GuildID = message.guild.id)
+                try:
+                    author = members.get(members.GuildID == guild.id, members.UserID == message.author.id)
+                except:
+                    author = members.create(GuildID = guild.id, UserID = message.author.id, msg_count = 0, points = 0)
+                author.msg_count += 1
+                author.points += 10
+                charset = '`!@#$%^&*()-+*/,.<>;:[]{}\\|\'\" '
+                print(message.content)
+                for char in message.content:
+                    if char in charset:
+                        author.points += 10
+                author.save()
 
         #async def leaderboard_update(guild, forced = False):
         #    lbUpdateDate = db.execute("SELECT * FROM guilds WHERE GuildID=?", [str(guild.id)]).fetchone()["lbUpdateDate"]
@@ -175,36 +194,39 @@ class cmd(commands.Cog):
     #        content = "Role doesn't exists"
     #    await ctx.respond(content)
 
-    #@slash_command(description = "literally a leaderboard")
-    #async def leaderboard(ctx):
-    #    content = "Counting messages..."
-    #    embed = None
-    #    response = await ctx.respond(content)
-    #    message = await response.original_message()
-    #    try:
-    #        content = "Here you go:"
-    #        await leaderboard_update(ctx.guild, forced=True)
-    #        embed = discord.Embed(
-    #            title = "{} leaderboard list".format(ctx.guild.name),
-    #            timestamp = datetime.now()
-    #            )
-    #        g_list = db.execute(f"SELECT * FROM MEMBERS_{str(ctx.guild.id)} ORDER BY points DESC").fetchall()
-    #        n_list = ""
-    #        m_list = ""
-    #        p_list = ""
-    #        for item in g_list:
-    #            n_list += str(g_list.index(item)+1) + "\n"
-    #            member = await bot.fetch_user(int(item["UserID"]))
-    #            m_list += member.display_name + "\n"
-    #            p_list += str(item["points"]) + "\n"
-    #        embed.add_field(name = "No.", value = n_list)
-    #        embed.add_field(name = "Members", value = m_list)
-    #        embed.add_field(name = "Points", value = p_list)
-    #    except:
-    #        content = "Sorry, something went wrong processing your request."
-    #        embed = None
-    #        traceback.print_exc()
-    #    await message.edit(content, embed)
+    @bot.slash_command(description = "literally a leaderboard")
+    async def leaderboard(self, ctx):
+        content = "Counting messages..."
+
+        embed = None
+        response = await ctx.respond(content)
+        message = await response.original_response()
+        try:
+            content = "Here you go:"
+            embed = discord.Embed(
+                title = "{} leaderboard list".format(ctx.guild.name),
+                timestamp = datetime.now()
+                )
+            guild = guilds.get(guilds.GuildID == ctx.guild.id)
+            leaderboard = members.select().where(members.GuildID == guild.id).order_by(members.points.desc())
+            place_field = ""
+            user_field = ""
+            points_field = ""
+            i = 0
+            for member in leaderboard:
+                i += 1
+                place_field += str(i) + "\n"
+                UserID = await self.bot.fetch_user(member.UserID)
+                user_field += UserID.display_name + "\n"
+                points_field += str(member.points) + "\n"
+            embed.add_field(name = "No.", value = place_field)
+            embed.add_field(name = "Members", value = user_field)
+            embed.add_field(name = "Points", value = points_field)
+        except:
+            content = "Sorry, something went wrong processing your request."
+            embed = None
+            traceback.print_exc()
+        await message.edit(content, embed=embed)
 
 
 

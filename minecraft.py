@@ -57,8 +57,8 @@ class mc_cmd(commands.Cog):
             edition = edition.upper()
 
         response = await ctx.respond(content="Please wait for the next status update, usually it doesn't takes more than 1 minute.")
-        message = await response.original_message()
-        server = servers.get_or_create(IP = ip, edition = edition, online = False, version = "Unknown")[0]
+        message = await response.original_response()
+        server = servers.get_or_create(IP = ip, edition = edition, online = False)[0]
         legacy.create(MessageID = message.id, type = "update", ChannelID = ctx.channel.id, IP = server.id, edition = edition)
 
     @bot.slash_command(description = "Sets channel for mc server status notifications")
