@@ -24,13 +24,17 @@ class members(BaseModel):
     msg_count = IntegerField()
     points = IntegerField()
 
-class roles(BaseModel):
+class role_tags(BaseModel):
     id = PrimaryKeyField()
     GuildID = ForeignKeyField(guilds, db_column = 'GuildID')
-    UserID = ForeignKeyField(members, db_column = 'UserID')
+    tag = CharField()
+    offset = BigIntegerField(null = True)
+
+class roles(BaseModel):
+    id = PrimaryKeyField()
     RoleID = BigIntegerField()
-    Group = CharField()
-    Expires = DateTimeField(null = True)
+    tag = ForeignKeyField(role_tags, db_column = 'tag', null = True)
+    expires = DateTimeField(null = True)
 
 class candidates(BaseModel):
     id = PrimaryKeyField()
@@ -44,5 +48,5 @@ class candidates(BaseModel):
 #    Supports = ForeignKeyField(candidates, db_column = 'UserID')
 
 db.connect()
-db.create_tables([guilds, members, roles, candidates])
+db.create_tables([guilds, members, role_tags, roles, candidates])
 
