@@ -7,4 +7,4 @@ app=Flask("KeepAlive")
 def index():
     return "<h1>VibinBot KeepAlive service</h1>"
 
-Thread(target=app.run,args=("0.0.0.0",10000)).start()
+Thread(target=app.run,args=("0.0.0.0",8080)).start()
