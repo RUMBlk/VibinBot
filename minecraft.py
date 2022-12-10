@@ -25,7 +25,7 @@ db.create_tables([servers, legacy])
 
 def ping_mc(ip, edition):
     if(edition[0] == 'J'):
-        server = JavaServer.lookup(ip, timeout = 5)
+        server = JavaServer.lookup(ip, timeout = 1)
     else:
         server = BedrockServer.lookup(ip, timeout = 1)
     return server

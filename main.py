@@ -1,3 +1,4 @@
+import logging
 import os
 import discord
 from dotenv import load_dotenv, find_dotenv
@@ -28,5 +29,7 @@ intents.messages = True
 intents.message_content = True
 
 bot = discord.Bot(intents = intents, debug_guilds=debug_guild)
+
+logging.basicConfig(level=logging.INFO)
 
 VB_discord.Bot(bot, os.environ['DELAY'], BOT_TOKEN, debug)
