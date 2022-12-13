@@ -1,0 +1,75 @@
+#Main
+bot_is_ready: "The bot is ready"
+processing: "Processing..."
+no_desc: "no_desc"
+indev: "not done yet"
+denied: "Sorry, this command is only for admins"
+bot_denied: "Sorry, I do not have \"{permission}\" permission in the channel to do that!"
+channel_denied: "Sorry, this command is only available for those who have \"{permission}\" permission in the channel."
+exception: "Seems like something went wrong :/\nPinging dev: <@431451036151185408>" #\n - new line; \t - tab
+#Permissions
+manage_roles: "Manage Roles"
+manage_webhooks: "Manage Webhooks"
+administrator: "Administrator"
+#database
+author_not_found: "For some reason you're not in my database, try to post a message at first."
+#Society
+##ADMIN##
+admin_congrats: "Congratulations! <@{new_admin_id}> is elected as server's administrator for the next month!"
+#role
+admin_role_desc: "Set admin role that will be assigned after election."
+admin_role_success: "Here you go!"
+#
+admin_apply_desc: "Apply for the next admin election"
+admin_apply_fail: "You already applied for the next admin election!"
+admin_apply_success: "Here you go!"
+admin_apply_not_active: "You're not active enough to apply for admin election"
+#
+admin_vote_alr_voted: "You already did vote for {candidate}"
+admin_vote_success: "Here you go!"
+admin_vote_not_candidate: "{candidate} is not a candidate!"
+#Main commands
+role_offset_desc: "please add this"
+role_offset_success: "Now custom activity roles will be placed after {role_name} role" #{} are variables that are replaced during execution, it's ok to not include them
+#
+claimrole_desc: "Claim a custom role if you're very active or boosted the server!"
+claimrole_a_!top: "Sorry, only top-10 active members of the server can claim a custom role!"
+claimrole_a_success: "Here you go!"
+claimrole_a_fail: "Sorry, only one activity role per member"
+#
+unclaimrole_desc: "Delete a claimed role if you don't want it or want to change it!"
+unclaimrole_a_success: "Here you go!"
+unclaimrole_a_fail: "You don't have an activity role to unclaim!"
+#
+leaderboard_desc: "literally a leaderboard"
+leaderboard_proc: "Counting messages..."
+leaderboard_empty: "The leaderboard is empty, please try later."
+leaderboard_embed_title: "{guild} leaderboard"
+leaderboard_embed_place: "No."
+leaderboard_embed_members: "Members"
+leaderboard_embed_points: "Points"
+leaderboard_success: "Here you go!"
+
+###################################################################################################
+
+#Minecraft
+mc_ready: "The minecraft.py module is ready"
+mc_status_embed_title: "[{edition} {version}]{ip} Server Status" #same as role_offset_success
+mc_status_embed_online: ":green_circle:Online: {online}/{slots}" #^
+mc_status_embed_offline: ":red_circle:Offline"
+mc_status_embed_edition: "Edition"
+mc_status_embed_ip: "Server IP"
+mc_status_embed_players: "Players"
+mc_notification: "{role} [{edition}]{ip} server is up!"
+#Minecraft commands
+addserver_desc: "Generates an embed message with mc server status. All fields are not case sensitive"
+addserver_success: "Please wait for the next status update, usually it doesn't takes more than 1 minute."
+#
+setnotification_desc: "Sets channel for mc server status notifications"
+setnotification_success: "Notifications for [{edition}]{ip} status set!"
+setnotification_fail: "The channel already has notifications enabled for such server, please consider pinging one role instead of few."
+#
+stopnotification_desc: "Removes mc server status notifications for this channel."
+stopnotification_success: "Success!"
+stopnotification_fail: "Notification with specified paramaters not found!"
+

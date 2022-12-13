@@ -24,14 +24,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="database.py" />
-    <Compile Include="minecraft.py" />
+    <Compile Include="cogs.py" />
     <Compile Include="keepalive.py" />
-    <Compile Include="storage.py" />
-    <Compile Include="VB_discord.py" />
+    <Compile Include="minecraft.py" />
     <Compile Include="main.py" />
+    <Compile Include="localisation.py" />
+    <Compile Include="debug.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".env" />
+    <Content Include="localisation\en_US.yml" />
     <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +46,9 @@
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
       <Architecture>X64</Architecture>
     </Interpreter>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="localisation\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
