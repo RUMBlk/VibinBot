@@ -50,7 +50,7 @@ leaderboard_embed_members: "Members"
 leaderboard_embed_points: "Points"
 leaderboard_success: "Here you go!"
 
-###################################################################################################
+####################################################################################################
 
 #Minecraft
 mc_ready: "The minecraft.py module is ready"
