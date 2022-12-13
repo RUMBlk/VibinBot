@@ -13,11 +13,7 @@ class Intents(discord.Intents):
 class events(commands.Cog):
     bot = discord.Bot()
 
-    def __init__(self, bot):
-        self.bot = bot
-
-    @commands.Cog.listener("on_connect")
-    async def on_ready(self):
+    async def on_startup(self):
         config = None
         try:
             config = internal.get(internal.id == 1)
@@ -61,6 +57,12 @@ class events(commands.Cog):
                         members.get(members.GuildID == guild_db.id, members.UserID == member.id)
                     except: 
                         members.create(GuildID = guild_db.id, UserID = member.id, msg_count = 0, points = 0)
+
+    def __init__(self, bot):
+        self.bot = bot
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.on_startup())
 
     @commands.Cog.listener("on_guild_join")
     async def on_guild_join(self, guild):

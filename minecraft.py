@@ -30,9 +30,9 @@ db.create_tables([servers, legacy])
 
 async def ping_mc(ip, edition):
     if(edition[0] == 'J'):
-        server = JavaServer.async_lookup(ip)
+        server = await JavaServer.async_lookup(ip)
     else:
-        server = BedrockServer.async_lookup(ip)
+        server = await BedrockServer.async_lookup(ip)
     return server
 
 async def compile_embed(locale, server, ip, edition, version):
