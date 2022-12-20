@@ -60,8 +60,8 @@ class events(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        loop = asyncio.get_event_loop()
+        #asyncio.set_event_loop(loop)
         loop.run_until_complete(self.on_startup())
 
     @commands.Cog.listener("on_guild_join")

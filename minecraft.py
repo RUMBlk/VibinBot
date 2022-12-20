@@ -1,3 +1,4 @@
+from shutil import unregister_archive_format
 from database import *
 from datetime import datetime
 from mcstatus import JavaServer
@@ -60,11 +61,14 @@ class init(commands.Cog):
         for server in servers.select():
             embed = None
             ping = None
+            unreachable = False
+            
             try:
                 ping = await ping_mc(server.IP, server.edition)
                 server.version = ping.status().version.name
             except:
                 server.online = False
+                unreachable = True
 
             for item in legacy.select().where(legacy.IP == server.id, legacy.edition == server.edition):
                 try:
@@ -74,7 +78,7 @@ class init(commands.Cog):
                             if embed is None: embed = await compile_embed(item.locale, ping, server.IP, server.edition, server.version)
                             await message.edit(content = "",embed = embed)
                     elif item.type == "notify":
-                        if ping is not None:
+                        if unreachable is not True:
                             if ping.status().players.online > 0 and server.online == False:
                                 await self.bot.get_channel(item.ChannelID).send(content = loc.get('mc_notification', item.locale).format(role = item.role, edition = server.edition, ip = server.IP))
                                 server.online = True
