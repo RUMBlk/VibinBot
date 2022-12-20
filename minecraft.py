@@ -54,7 +54,7 @@ async def compile_embed(locale, server, ip, edition, version):
 class init(commands.Cog):
     bot = discord.Bot()
 
-    @tasks.loop(seconds = 10)
+    @tasks.loop(seconds = 60)
     async def updatestatus(self):
         await self.bot.wait_until_ready()
 
