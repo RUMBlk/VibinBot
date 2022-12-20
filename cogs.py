@@ -269,11 +269,11 @@ class commands(commands.Cog):
         await message.edit(loc.get(status, locale))
 
     @bot.slash_command(description = loc.get('leaderboard_desc'))
-    async def leaderboard(self, ctx):
+    async def leaderboard(self, ctx, ephemeral: bool):
         guild = guilds.get(guilds.GuildID == ctx.guild.id)
         locale = guild.locale
         embed = None
-        response = await ctx.respond(loc.get('leaderboard_proc', locale))
+        response = await ctx.respond(content = loc.get('leaderboard_proc', locale), ephemeral = ephemeral)
         message = await response.original_response()
         status = 'leaderboard_'
         try:

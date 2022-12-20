@@ -57,7 +57,7 @@ class init(commands.Cog):
     async def updatestatus(self):
         await self.bot.wait_until_ready()
 
-        for server in servers:
+        for server in servers.select():
             embed = None
             ping = None
             try:
