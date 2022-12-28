@@ -263,7 +263,7 @@ class commands(commands.Cog):
                 await ctx.guild.get_role(tag.role.id).delete()
                 tag.row.delete_instance()
                 status += 'a_success'
-        except: 
+        except:
             status += 'a_fail'
         await message.edit(loc.get(status, locale))
 
