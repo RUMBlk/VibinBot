@@ -13,6 +13,7 @@ class Intents(discord.Intents):
 class events(commands.Cog):
     bot = discord.Bot()
 
+    @commands.Cog.listener("on_ready")
     async def on_startup(self):
         config = None
         try:
@@ -45,6 +46,7 @@ class events(commands.Cog):
         config.save()
 
         for guild in self.bot.guilds:
+            print("sdfs")
             guild_db = None
             try:
                 guild_db = guilds.get(guilds.GuildID == guild.id)
@@ -60,9 +62,6 @@ class events(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        loop = asyncio.get_event_loop()
-        #asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.on_startup())
 
     @commands.Cog.listener("on_guild_join")
     async def on_guild_join(self, guild):
@@ -343,8 +342,8 @@ class backend():
                     if new_admin['votes'] is None or vots > new_admin['votes']:
                         cand_member = members.select().where(members.id == candidate.UserID).get()
                         new_admin = {'id': cand_member.UserID, 'votes': vots}
-                admin_tag = role_tags.get(role_tags.GuildID == guild_db.id, role_tags.tag == "ADMIN")
                 try:
+                    admin_tag = role_tags.get(role_tags.GuildID == guild_db.id, role_tags.tag == "ADMIN")
                     admin_role = guild.get_role(admin_tag.original)
                     try:
                         guild_members = await guild.fetch_members(limit=None)
