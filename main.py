@@ -33,6 +33,7 @@ intents = discord.Intents.none()
 intents.guilds = True
 intents.messages = True
 intents.message_content = True
+intents.members = True
 
 bot = discord.Bot(intents = intents, debug_guilds=debug_guild)
 #Debug

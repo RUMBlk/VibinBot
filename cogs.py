@@ -101,7 +101,7 @@ class society(commands.Cog):
         message = await response.original_response()
         status = 'admin_role_'
         try:
-            if not (ctx.guild.me.guild_permissions.manage_roles or ctx.channel.permissions_for(ctx.guild.me).manage_roles):
+            if not (ctx.guild.me.guild_permissions.manage_roles or ctx.author == ctx.guild.owner):
                 status = 'bot_denied'
             elif ctx.channel.permissions_for(ctx.author).manage_roles:
                     try:
@@ -268,10 +268,12 @@ class commands(commands.Cog):
         await message.edit(loc.get(status, locale))
 
     @bot.slash_command(description = loc.get('leaderboard_desc'))
-    async def leaderboard(self, ctx, ephemeral: bool):
+    async def leaderboard(self, ctx):
         guild = guilds.get(guilds.GuildID == ctx.guild.id)
         locale = guild.locale
         embed = None
+        ephemeral = True
+        if ctx.guild.me.guild_permissions.send_messages: ephemeral = False
         response = await ctx.respond(content = loc.get('leaderboard_proc', locale), ephemeral = ephemeral)
         message = await response.original_response()
         status = 'leaderboard_'
@@ -346,10 +348,9 @@ class backend():
                     admin_tag = role_tags.get(role_tags.GuildID == guild_db.id, role_tags.tag == "ADMIN")
                     admin_role = guild.get_role(admin_tag.original)
                     try:
-                        guild_members = await guild.fetch_members(limit=None)
-                        for member in guild_members:
-                            member.remove_roles(admin_role)
-                    except: pass
+                        for member in admin_role.members:
+                            await member.remove_roles(admin_role)
+                    except: traceback.print_exc()
                     admin_member = await guild.fetch_member(new_admin['id'])
                     await admin_member.add_roles(admin_role)
                     if guild.system_channel:
@@ -369,7 +370,7 @@ class backend():
             members.update(points = 0).where(members.points != 0).execute()
             candidates.delete().execute()
             votes.delete().execute()
-        except: traceback.print_exc()
+        except: pass
 
 
 
