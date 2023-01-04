@@ -30,6 +30,7 @@
     <Compile Include="main.py" />
     <Compile Include="localisation.py" />
     <Compile Include="debug.py" />
+    <Compile Include="moderation.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".env" />

@@ -22,6 +22,7 @@ class guilds(BaseModel):
     id = PrimaryKeyField()
     GuildID = BigIntegerField()
     locale = CharField(default = "en_US")
+    reports_channel = BigIntegerField(null = True)
 
 class members(BaseModel):
     id = PrimaryKeyField()
@@ -42,6 +43,11 @@ class roles(BaseModel):
     RoleID = BigIntegerField()
     tag = ForeignKeyField(role_tags, db_column = 'tag', null = True)
     expires = DateField(null = True)
+
+#class elections():
+#    id = PrimaryKeyField()
+#    GuildID =  ForeignKeyField(guilds, db_column = 'GuildID')
+#    RoleID = ForeignKeyField(guilds, db_column = 'RoleID')
 
 class candidates(BaseModel):
     id = PrimaryKeyField()

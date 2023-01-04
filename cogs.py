@@ -1,4 +1,3 @@
-import asyncio
 import discord
 import traceback
 from discord.ext import tasks, commands
@@ -33,7 +32,7 @@ class events(commands.Cog):
                     role.delete_instance()
             except: pass
 
-        if today.month > config.last_reset.month:
+        if today.month is not config.last_reset.month:
             try:
                 try:
                     await backend.elections(self.bot)
@@ -46,7 +45,6 @@ class events(commands.Cog):
         config.save()
 
         for guild in self.bot.guilds:
-            print("sdfs")
             guild_db = None
             try:
                 guild_db = guilds.get(guilds.GuildID == guild.id)
@@ -101,9 +99,9 @@ class society(commands.Cog):
         message = await response.original_response()
         status = 'admin_role_'
         try:
-            if not (ctx.guild.me.guild_permissions.manage_roles or ctx.author == ctx.guild.owner):
+            if not (ctx.guild.me.guild_permissions.manage_roles):
                 status = 'bot_denied'
-            elif ctx.channel.permissions_for(ctx.author).manage_roles:
+            elif ctx.author == ctx.guild.owner:
                     try:
                         role_tags.get(role_tags.GuildID == guild.id, role_tags.tag == "ADMIN")
                         query = role_tags.update(original = role.id).where(role_tags.GuildID == guild.id, role_tags.tag == "ADMIN")

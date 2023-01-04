@@ -13,6 +13,7 @@ import keepalive
 import cogs
 from database import *
 import minecraft
+import moderation
 import localisation as loc
 
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +46,7 @@ else: BOT_TOKEN = os.environ['BOT_TOKEN']
 #Main cogs
 bot.add_cog(cogs.events(bot))
 bot.add_cog(cogs.society(bot))
+bot.add_cog(moderation.moderation(bot))
 bot.add_cog(cogs.commands(bot))
 #Minecraft cogs
 bot.add_cog(minecraft.init(bot)) #init cog loads other Minecraft cogs
