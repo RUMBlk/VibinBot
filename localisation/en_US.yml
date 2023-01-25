@@ -14,11 +14,9 @@ administrator: "Administrator"
 #database
 author_not_found: "For some reason you're not in my database, try to post a message at first."
 #Society
-##ADMIN##
-admin_congrats: "Congratulations! <@{new_admin_id}> is elected as the server's administrator for the next month!"
-election_system: "Congratulations! <@{elected_members}> have won the <@&role> election!"
 ##MODERATION##
 context_report: "Report"
+moderation_desc: "Moderation commands"
 reports_channel_desc: "Set the channel for receiving reports"
 reports_channel_success: "The channel has been successfuly set for receiving reports!"
 report_message_head: "Author: {author}\nOriginal message: {jump_url}\nPosted at: <t:{posted_at}:F>\n\n"
@@ -27,18 +25,34 @@ report_message_attach: "Attachments:\n{attachments}\n\n"
 report_message_embeds: "Embeds:\n"
 report_embed_title: "Click here to jump to the message if not deleted"
 report_success: "The message has been successfuly reported!"
+##ADMIN##
+election_system: "Congratulations! <@{elected_members}> have won the <@&role> election!"
+elections_not_candidate: "{claimer} is not a claimer!"
 #role
-admin_role_desc: "Set admin role that will be assigned after election."
-admin_role_success: "Here you go!"
+elections_desc: "Elections commands"
+elections_add_desc: "Open elections for the specified role"
+elections_add_exists: "The role is already electable! If you wish to cancel elections for the role consider to use \"/elections delete\""
+elections_add_success: "Here you go!"
 #
-admin_apply_desc: "Apply for the next admin election"
-admin_apply_fail: "You already applied for the next admin election!"
-admin_apply_success: "Here you go!"
-admin_apply_not_active: "You're not active enough to apply for admin election"
+elections_delete_desc: "Cancel elections for the specified role"
+elections_delete_success: "Here you go!"
+elections_delete_fail: "There's no elections for the specified role to cancel!"
 #
-admin_vote_alr_voted: "You already did vote for {candidate}"
-admin_vote_success: "Here you go!"
-admin_vote_not_candidate: "{candidate} is not a candidate!"
+elections_claim_desc: "Take participation in points race for the specified electable role"
+elections_claim_exists: "You already claim the role! If you wish to unclaim consider to use \"/elections unclaim\""
+elections_claim_success: "Here you go!"
+#
+elections_unclaim_desc: "Leave race for the specified role"
+elections_unclaim_success: "Here you go!"
+elections_unclaim_fail: "You don't participate in race for the specified role to unclaim it!"
+#
+elections_support_desc: "Support the specified member who claims the role with your cloned points"
+elections_support_exists: "You already support {claimer}!"
+elections_support_success: "Here you go!"
+#
+elections_unsupport_desc: "Unsupport and takes away points from the specified member who claims the role"
+elections_unsupport_success: "Here you go!"
+elections_unsupport_fail: "You don't support {claimer} to unsupport them!"
 #Main commands
 role_offset_desc: "please add this"
 role_offset_success: "Now custom activity roles will be placed after {role_name} role" #{} are variables that are replaced during execution, it's ok to not include them
@@ -59,6 +73,7 @@ leaderboard_embed_title: "{guild} leaderboard"
 leaderboard_embed_place: "No."
 leaderboard_embed_members: "Members"
 leaderboard_embed_points: "Points"
+leaderboard_embed_sum: "Server value: {server_value}"
 leaderboard_success: "Here you go!"
 
 ####################################################################################################

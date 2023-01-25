@@ -14,6 +14,7 @@ import cogs
 from database import *
 import minecraft
 import moderation
+import elections
 import localisation as loc
 
 logging.basicConfig(level=logging.INFO)
@@ -45,11 +46,11 @@ if debug:
 else: BOT_TOKEN = os.environ['BOT_TOKEN']
 #Main cogs
 bot.add_cog(cogs.events(bot))
-bot.add_cog(cogs.society(bot))
 bot.add_cog(moderation.moderation(bot))
-bot.add_cog(cogs.commands(bot))
+bot.add_cog(cogs.points(bot))
+bot.add_cog(elections.electionsCog(bot))
 #Minecraft cogs
-bot.add_cog(minecraft.init(bot)) #init cog loads other Minecraft cogs
+#bot.add_cog(minecraft.init(bot)) #init cog loads other Minecraft cogs
 
 @bot.event
 async def on_ready():

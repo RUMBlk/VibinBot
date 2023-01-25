@@ -31,6 +31,7 @@
     <Compile Include="localisation.py" />
     <Compile Include="debug.py" />
     <Compile Include="moderation.py" />
+    <Compile Include="elections.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".env" />

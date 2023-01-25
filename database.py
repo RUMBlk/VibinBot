@@ -31,34 +31,19 @@ class members(BaseModel):
     msg_count = IntegerField()
     points = IntegerField()
 
-class role_tags(BaseModel):
-    id = PrimaryKeyField()
-    GuildID = ForeignKeyField(guilds, db_column = 'GuildID')
-    tag = CharField()
-    original = BigIntegerField(null = True)
+#class role_tags(BaseModel):
+#    id = PrimaryKeyField()
+#    GuildID = ForeignKeyField(guilds, db_column = 'GuildID')
+#    tag = CharField()
+#    original = BigIntegerField(null = True)
 
 class roles(BaseModel):
     id = PrimaryKeyField()
-    GuildID = ForeignKeyField(guilds, db_column = 'GuildID')
+    #GuildID = ForeignKeyField(guilds, db_column = 'GuildID')
     RoleID = BigIntegerField()
-    tag = ForeignKeyField(role_tags, db_column = 'tag', null = True)
-    expires = DateField(null = True)
-
-#class elections():
-#    id = PrimaryKeyField()
-#    GuildID =  ForeignKeyField(guilds, db_column = 'GuildID')
-#    RoleID = ForeignKeyField(guilds, db_column = 'RoleID')
-
-class candidates(BaseModel):
-    id = PrimaryKeyField()
-    GuildID =  ForeignKeyField(guilds, db_column = 'GuildID')
-    UserID =  ForeignKeyField(members, db_column = 'UserID')
-
-class votes(BaseModel):
-    id = PrimaryKeyField()
-    UserID = ForeignKeyField(members, db_column = 'UserID')
-    candidate = ForeignKeyField(candidates, db_column = 'candidate')
+    #tag = ForeignKeyField(role_tags, db_column = 'tag', null = True)
+    #expires = DateField(null = True)
 
 db.connect()
-db.create_tables([internal, guilds, members, role_tags, roles, candidates, votes])
+db.create_tables([internal, guilds, members, roles])
 

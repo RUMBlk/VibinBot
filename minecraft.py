@@ -1,4 +1,5 @@
 from shutil import unregister_archive_format
+from peewee import *
 from database import *
 from datetime import datetime
 from mcstatus import JavaServer
