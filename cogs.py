@@ -141,9 +141,9 @@ class points(commands.Cog):
                     UserID = ctx.guild.get_member(member.UserID)
                     if UserID is None: UserID = await ctx.guild.fetch_member(member.UserID)
                     member_name = UserID.display_name
+                    if len(member_name) > 18: member_name = f'{member_name[:18]}...' 
                 except:
                     member_name = member.UserID
-                if len(member_name) > 18: member_name = f'{member_name[:18]}...' 
                 leaderboard.append([i, member_name, member.points])
                 server_value += member.points
                 if i == 10: break
