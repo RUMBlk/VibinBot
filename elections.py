@@ -61,7 +61,6 @@ async def on_message(message, reward):
                 claimer.Points += reward
                 claimer.save()
                 if election not in planned_elections: planned_elections.append(election)
-        print(planned_elections)
         for election in planned_elections:
             await elect(message.guild, election, guild)
     except: traceback.print_exc()

@@ -24,6 +24,10 @@ class guilds(BaseModel):
     locale = CharField(default = "en_US")
     reports_channel = BigIntegerField(null = True)
 
+class channels(BaseModel):
+    id = PrimaryKeyField()
+    ChannelID = BigIntegerField()
+
 class members(BaseModel):
     id = PrimaryKeyField()
     GuildID = ForeignKeyField(guilds, db_column = 'GuildID')
@@ -45,5 +49,5 @@ class roles(BaseModel):
     #expires = DateField(null = True)
 
 db.connect()
-db.create_tables([internal, guilds, members, roles])
+db.create_tables([internal, guilds, channels, members, roles])
 

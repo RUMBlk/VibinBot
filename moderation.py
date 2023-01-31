@@ -53,7 +53,7 @@ class moderation(commands.Cog):
 
             channel = await self.bot.fetch_channel(guild.reports_channel)
             to_react = await channel.send(content = reported_content, embeds = message.embeds)
-            await to_react.add_reaction('➡️')
+            await to_react.add_reaction('✅')
             #await channel.send(content=loc.get(f'{status}report', guild.locale).format_map({'author_id': message.author.id, 'reported_content': message.content}))
             status += 'success'
         except: 
