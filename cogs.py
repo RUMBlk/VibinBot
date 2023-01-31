@@ -138,7 +138,7 @@ class points(commands.Cog):
             for member in membersDB:
                 i += 1
                 UserID = ctx.guild.get_member(member.UserID)
-                if UserID is None: await self.bot.fetch_member(member.UserID)
+                if UserID is None: await ctx.guild.fetch_member(member.UserID)
                 member_name = UserID.display_name
                 if len(member_name) > 18: member_name = f'{member_name[:18]}...' 
                 leaderboard.append([i, member_name, member.points])
