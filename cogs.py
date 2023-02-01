@@ -126,7 +126,7 @@ class points(commands.Cog):
         leaderboard = []
         #embed = None
         ephemeral = True
-        if ctx.guild.me.guild_permissions.send_messages: ephemeral = False
+        if ctx.channel.permissions_for(ctx.guild.me).send_messages: ephemeral = False
         response = await ctx.respond(content = loc.get('leaderboard_proc', locale), ephemeral = ephemeral)
         message = await response.original_response()
         status = 'leaderboard_'
