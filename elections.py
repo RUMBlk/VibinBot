@@ -29,7 +29,6 @@ db.db.create_tables([elections, claimers, supporters])
 #Database end
 
 async def elect(guild, election, guildDB = None):
-    if db.is_closed(): db.connect()
     if guildDB is None: guildDB = db.guilds.get(db.guilds.GuildID == message.guild.id)
     claims = claimers.select().where(claimers.ElectID == election.id).order_by(claimers.Points.desc())
     role = guild.get_role(db.roles.get(db.roles.id == election.RoleID).RoleID)
@@ -50,7 +49,6 @@ async def elect(guild, election, guildDB = None):
 
 @cogs.on_message_listener
 async def on_message(message, reward):
-    if db.is_closed(): db.connect()
     try:
         guild = db.guilds.get(db.guilds.GuildID == message.guild.id)
         member = db.members.get(db.members.GuildID == guild.id, db.members.UserID == message.author.id)
@@ -77,7 +75,6 @@ class electionsCog(commands.Cog):
 
     @elections.command(description = loc.get('elections_add_desc'))
     async def add(self, ctx, role: discord.Role, limit = 1):
-        if db.is_closed(): db.connect()
         guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale))
         message = await response.original_response()
@@ -105,7 +102,6 @@ class electionsCog(commands.Cog):
 
     @elections.command(description = loc.get('elections_delete_desc'))
     async def delete(self, ctx, role: discord.Role):
-        if db.is_closed(): db.connect()
         guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale))
         message = await response.original_response()
@@ -131,7 +127,6 @@ class electionsCog(commands.Cog):
 
     @elections.command(description = loc.get('elections_claim_desc'))
     async def claim(self, ctx, role: discord.Role):
-        if db.is_closed(): db.connect()
         guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale))
         message = await response.original_response()
@@ -160,7 +155,6 @@ class electionsCog(commands.Cog):
 
     @elections.command(description = loc.get('elections_unclaim_desc'))
     async def unclaim(self, ctx, role: discord.Role):
-        if db.is_closed(): db.connect()
         guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale))
         message = await response.original_response()
@@ -193,7 +187,6 @@ class electionsCog(commands.Cog):
 
     @elections.command(description = loc.get('elections_support_desc'))
     async def support(self, ctx, role: discord.Role, claimer: discord.Member):
-        if db.is_closed(): db.connect()
         guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale), ephemeral = True)
         message = await response.original_response()
@@ -230,7 +223,6 @@ class electionsCog(commands.Cog):
 
     @elections.command(description = loc.get('elections_unsupport_desc'))
     async def unsupport(self, ctx, role: discord.Role, claimer: discord.Member):
-        if db.is_closed(): db.connect()
         guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale), ephemeral = True)
         message = await response.original_response()

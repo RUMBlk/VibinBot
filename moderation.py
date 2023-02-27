@@ -15,7 +15,6 @@ class moderation(commands.Cog):
 
     @moderation.command(description = loc.get('reports_channel_desc'))
     async def channel(self, ctx):
-        if db.is_closed(): db.connect()
         guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale))
         message = await response.original_response()
@@ -34,7 +33,6 @@ class moderation(commands.Cog):
 
     @bot.message_command(name=loc.get('context_report'))
     async def report(self, ctx, message: discord.Message):
-        if db.is_closed(): db.connect()
         guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale), ephemeral = True)
         response = await response.original_response()
