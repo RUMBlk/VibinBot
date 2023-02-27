@@ -1,18 +1,13 @@
 import os
 from dotenv import load_dotenv, find_dotenv
 from peewee import *
-from playhouse.shortcuts import RetryOperationalError
 from datetime import date
 
 load_dotenv(find_dotenv())
 
 db = None
 
-
-class reconnect(RetryOperationalError, PostgresqlDatabase):
-    pass
-
-if os.getenv('DEBUG') is None: db = reconnect(PostgresqlDatabase(os.environ['DB_NAME'], user=os.environ['DB_USER'], password=os.environ['DB_PASS'], host=os.environ['DB_HOST'], port=os.environ['DB_PORT']))
+if os.getenv('DEBUG') is None: db = PostgresqlDatabase(os.environ['DB_NAME'], user=os.environ['DB_USER'], password=os.environ['DB_PASS'], host=os.environ['DB_HOST'], port=os.environ['DB_PORT'])
 else: db = SqliteDatabase('tmp/debug.db')
 
 class BaseModel(Model):

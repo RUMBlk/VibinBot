@@ -24,6 +24,7 @@ class events(commands.Cog):
 
     @commands.Cog.listener("on_ready")
     async def on_startup(self):
+        if db.is_closed(): db.connect()
         for guild in self.bot.guilds:
             guild_db = None
             try:
@@ -43,6 +44,7 @@ class events(commands.Cog):
 
     @commands.Cog.listener("on_guild_join")
     async def on_guild_join(self, guild):
+        if db.is_closed(): db.connect()
         try:
             guilds.get(guilds.GuildID == guild.id)
         except:
@@ -51,6 +53,7 @@ class events(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def on_message(self, message):
+        if db.is_closed(): db.connect()
         channelDB = channels.get_or_none(ChannelID = message.channel.id)
         if message.author.bot is False and channelDB is None:
             guild = guilds.get(GuildID = message.guild.id)
@@ -83,6 +86,7 @@ class points(commands.Cog):
 
     @points_edit.command(description = loc.get('points_add_desc'))
     async def add(self, ctx, member: discord.Member, amount: int):
+        if db.is_closed(): db.connect()
         guild = guilds.get(guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale))
         message = await response.original_response()
@@ -104,6 +108,7 @@ class points(commands.Cog):
 
     @points_edit.command(description = loc.get('points_edit_ignore_desc'))
     async def ignore(self, ctx, channel: discord.TextChannel):
+        if db.is_closed(): db.connect()
         guild = guilds.get(guilds.GuildID == ctx.guild.id)
         response = await ctx.respond(content = loc.get('processing', guild.locale))
         message = await response.original_response()
@@ -121,6 +126,7 @@ class points(commands.Cog):
 
     @bot.slash_command(description = loc.get('leaderboard_desc'))
     async def leaderboard(self, ctx):
+        if db.is_closed(): db.connect()
         guild = guilds.get(guilds.GuildID == ctx.guild.id)
         locale = guild.locale
         leaderboard = []
