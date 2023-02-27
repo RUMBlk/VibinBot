@@ -10,8 +10,6 @@ db = None
 if os.getenv('DEBUG') is None: db = PostgresqlDatabase(os.environ['DB_NAME'], user=os.environ['DB_USER'], password=os.environ['DB_PASS'], host=os.environ['DB_HOST'], port=os.environ['DB_PORT'])
 else: db = SqliteDatabase('tmp/debug.db')
 
-db.get_conn().ping(True)
-
 class BaseModel(Model):
     class Meta:
         database = db
@@ -51,5 +49,6 @@ class roles(BaseModel):
     #expires = DateField(null = True)
 
 db.connect()
+db.get_conn().ping(True)
 db.create_tables([internal, guilds, channels, members, roles])
 
