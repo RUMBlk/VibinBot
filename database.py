@@ -49,6 +49,5 @@ class roles(BaseModel):
     #expires = DateField(null = True)
 
 db.connect()
-db.get_conn().ping(True)
 db.create_tables([internal, guilds, channels, members, roles])
 
