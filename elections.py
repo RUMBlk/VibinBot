@@ -113,7 +113,7 @@ class electionsCog(commands.Cog):
                     try:
                         roleDB = db.roles.get(db.roles.RoleID == role.id)
                         election = elections.get(elections.RoleID == roleDB.id)
-                        election.delete_instance()
+                        election.delete().execute()
                         status += 'success'
                     except:
                         status += 'fail'
@@ -170,9 +170,7 @@ class electionsCog(commands.Cog):
                     election = elections.get(elections.GuildID == guild.id, elections.RoleID == roleDB.id)
                     try:
                         claim = claimers.get(claimers.ElectID == election.id, claimers.UserID == member.id)
-                        delete_supports=supporters.delete().where(supporters.Claimer==claim.id)
-                        delete_supports.execute()
-                        claim.delete_instance()
+                        claim.delete().execute()
                         await elect(ctx.guild, election, guild)
                         status += 'success'
                     except:
@@ -243,7 +241,7 @@ class electionsCog(commands.Cog):
                             support = supporters.get(supporters.UserID == author.id, supporters.Claimer == claimerDB.id)
                             claimerDB.Points -= author.points
                             claimerDB.save()
-                            support.delete_instance()
+                            support.delete().execute()
                             await elect(ctx.guild, election, guild)
                             status += 'success'
                         except:
