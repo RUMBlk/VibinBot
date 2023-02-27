@@ -25,18 +25,11 @@ class events(commands.Cog):
     @commands.Cog.listener("on_ready")
     async def on_startup(self):
         for guild in self.bot.guilds:
-            guild_db = None
-            try:
-                guild_db = guilds.get(guilds.GuildID == guild.id)
-            except:
-                guild_db = guilds.create(GuildID = guild.id)
+            guild_db = guilds.get_or_create(GuildID = guild.id)[0]
 
             for member in guild.members:
                 if member.bot is False:
-                    try:
-                        members.get(members.GuildID == guild_db.id, members.UserID == member.id)
-                    except: 
-                        members.create(GuildID = guild_db.id, UserID = member.id, msg_count = 0, points = 0)
+                    members.get_or_create(GuildID = guild_db.id, UserID = member.id)
 
     def __init__(self, bot):
         self.bot = bot
@@ -48,16 +41,11 @@ class events(commands.Cog):
         except:
             guilds.create(GuildID = guild.id)
 
-
     @commands.Cog.listener("on_message")
     async def on_message(self, message):
-        channelDB = channels.get_or_none(ChannelID = message.channel.id)
-        if message.author.bot is False and channelDB is None:
+        if message.author.bot is False:
             guild = guilds.get(GuildID = message.guild.id)
-            try:
-                author = members.get(members.GuildID == guild.id, members.UserID == message.author.id)
-            except:
-                author = members.create(GuildID = guild.id, UserID = message.author.id, msg_count = 0, points = 0)
+            author = members.get_or_create(GuildID = guild.id, UserID = message.author.id)[0]
             reward = 0
             author.msg_count += 1
             ##The punctuation reward requires more conditions to prevent abusing
@@ -72,93 +60,76 @@ class events(commands.Cog):
             author.save()
 
             for func in on_message:
-                await func(message, reward)
+                await func([self.bot, message, reward])
 
-class points(commands.Cog):
+class society(commands.Cog):
     bot = discord.Bot()
+    locale_class = loc.locale().get('society')
     def __init__(self, bot):
         self.bot = bot
 
-    points_edit = discord.SlashCommandGroup("points_edit", loc.get('points_edit_desc'))
+    society = discord.SlashCommandGroup("society", locale_class.get('desc'))
 
-    @points_edit.command(description = loc.get('points_add_desc'))
+    @society.command(description = locale_class.get('add').get('desc'))
     async def add(self, ctx, member: discord.Member, amount: int):
-        guild = guilds.get(guilds.GuildID == ctx.guild.id)
-        response = await ctx.respond(content = loc.get('processing', guild.locale))
-        message = await response.original_response()
-        status = 'points_edit_add_'
-        try:
-            if ctx.author == ctx.guild.owner:
-                    try:
-                        member = members.get(members.GuildID == guild.id, members.UserID == member.id)
-                        member.points += amount
-                        member.save()
-                        status += 'success'
-                    except: status += 'no_member'
-            else:
-                status = 'channel_denied'
-        except:
-            traceback.print_exc()
-            status = 'exception'
-        await message.edit(content=loc.get(status, guild.locale))
+        guildDB = guilds.get(guilds.GuildID == ctx.guild.id)
+        locale = loc.locale(guildDB.locale)
+        if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('owner')})
+        else:
+            member = members.get_or_create(GuildID = guildDB.id, UserID = member.id)[0]
+            member.points += amount
+            member.save()
+            answer = locale.get('success')
+        await ctx.respond(content=answer)
 
-    @points_edit.command(description = loc.get('points_edit_ignore_desc'))
+    @society.command(description = locale_class.get('ignore').get('ignore'))
     async def ignore(self, ctx, channel: discord.TextChannel):
-        guild = guilds.get(guilds.GuildID == ctx.guild.id)
-        response = await ctx.respond(content = loc.get('processing', guild.locale))
-        message = await response.original_response()
-        status = 'points_edit_ignore_'
-        try:
+        guildDB = guilds.get(guilds.GuildID == ctx.guild.id)
+        locale = loc.locale(guildDB.locale)
+        locale_func = locale.get('ignore')
+        if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('owner')})
+        else:
             channelDB = channels.get_or_create(ChannelID = channel.id)
             points_ignore.get_or_create(Channel = channelDB[0].id)
-            status += 'success'
-        except:
-            traceback.print_exc()
-            status = 'exception'
-        await message.edit(content=loc.get(status, guild.locale))
+            answer=locale_func.get('success')
+        await ctx.respond(content = answer)
 
-    #points = discord.SlashCommandGroup("points", loc.get('points_desc'))
+    #points = discord.SlashCommandGroup("points", locale().get('points_desc'))
 
-    @bot.slash_command(description = loc.get('leaderboard_desc'))
+    @society.command(description = locale_class.get('leaderboard').get('desc'))
     async def leaderboard(self, ctx):
-        guild = guilds.get(guilds.GuildID == ctx.guild.id)
-        locale = guild.locale
+        guildDB = guilds.get(guilds.GuildID == ctx.guild.id)
+        locale = loc.locale(guildDB.locale)
+        locale_func = locale.get('society').get('leaderboard')
         leaderboard = []
         #embed = None
         ephemeral = True
         if ctx.channel.permissions_for(ctx.guild.me).send_messages: ephemeral = False
-        response = await ctx.respond(content = loc.get('leaderboard_proc', locale), ephemeral = ephemeral)
+        response = await ctx.respond(content = locale_func.get('processing'), ephemeral = ephemeral)
         message = await response.original_response()
-        status = 'leaderboard_'
-        try:
-            guild = guilds.get(guilds.GuildID == ctx.guild.id)
-            membersDB = members.select().where(members.GuildID == guild.id).order_by(members.points.desc())
-            server_value = 0
-            i = 0
-            for member in membersDB:
-                i += 1
-                try:
-                    UserID = ctx.guild.get_member(member.UserID)
-                    if UserID is None: UserID = await ctx.guild.fetch_member(member.UserID)
-                    member_name = UserID.display_name
-                    if len(member_name) > 18: member_name = f'{member_name[:18]}...' 
-                except:
-                    member_name = member.UserID
-                leaderboard.append([i, member_name, member.points])
-                server_value += member.points
-                if i == 10: break
-            leaderboard = '```' + tabulate.tabulate(leaderboard, headers = [loc.get('leaderboard_embed_place', locale), loc.get('leaderboard_embed_members', locale), loc.get('leaderboard_embed_points', locale)], tablefmt = 'github') + '```'
-            leaderboard += '```' + loc.get('leaderboard_embed_sum', locale).format_map({'server_value': server_value}) + '```'
-            status = leaderboard
 
-            #embed = await backend.leaderboard_embed(ctx, self.bot, leaderboard, locale)
-            #if embed is not None: status += 'success'
-            #else: status += 'empty'
-        except:
-            traceback.print_exc()
-            status = loc.get('exception', locale)
-            embed = None
-        await message.edit(content = status, allowed_mentions = None)
+        membersDB = members.select().where(members.GuildID == guildDB.id).order_by(members.points.desc())
+        server_value = 0
+        i = 0
+        for member in membersDB:
+            i += 1
+            try:
+                UserID = ctx.guild.get_member(member.UserID)
+                if UserID is None: UserID = await ctx.guild.fetch_member(member.UserID)
+                member_name = UserID.display_name
+                if len(member_name) > 18: member_name = f'{member_name[:18]}...' 
+            except:
+                member_name = member.UserID
+            leaderboard.append([i, member_name, member.points])
+            server_value += member.points
+            if i == 10: break
+        leaderboard = '```' + tabulate.tabulate(leaderboard, headers = [locale_func.get('embed').get('place'), locale_func.get('embed').get('members'), locale_func.get('embed').get('points')], tablefmt = 'github') + '```'
+        leaderboard += '```' + locale_func.get('embed').get('sum').format_map({'server_value': server_value}) + '```'
+
+        #embed = await backend.leaderboard_embed(ctx, self.bot, leaderboard, locale)
+        #if embed is not None: status += 'success'
+        #else: status += 'empty'
+        await message.edit(content = leaderboard, allowed_mentions = None)
 
 class backend():
     def leaderboard_place(guild_db_id, member_id):
@@ -184,13 +155,13 @@ class backend():
             server_value += member.points
             if i == 10: break
         embed = discord.Embed(
-            title = loc.get('leaderboard_embed_title', locale).format_map({'guild': ctx.guild.name}),
+            title = locale().get('leaderboard_embed_title', locale).format_map({'guild': ctx.guild.name}),
             timestamp = dt.now()
         )
-        embed.add_field(name = loc.get('leaderboard_embed_place', locale), value = place_field)
-        embed.add_field(name = loc.get('leaderboard_embed_members', locale), value = user_field)
-        embed.add_field(name = loc.get('leaderboard_embed_points', locale), value = points_field)
-        embed.add_field(name = loc.get('leaderboard_embed_sum', locale).format_map({'server_value': server_value}), value = '')
+        embed.add_field(name = locale().get('leaderboard_embed_place', locale), value = place_field)
+        embed.add_field(name = locale().get('leaderboard_embed_members', locale), value = user_field)
+        embed.add_field(name = locale().get('leaderboard_embed_points', locale), value = points_field)
+        embed.add_field(name = locale().get('leaderboard_embed_sum', locale).format_map({'server_value': server_value}), value = '')
         if i == 0:
             return None
         else:

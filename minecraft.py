@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands, tasks
 import cogs
 import traceback
-import localisation as loc
+from localisation import locale
 
 #Section: Database
 class servers(BaseModel):
@@ -39,17 +39,17 @@ async def ping_mc(ip, edition):
 
 async def compile_embed(locale, server, ip, edition, version):
     embed = discord.Embed(
-        title = loc.get('mc_status_embed_title', locale).format(edition=edition, version=version, ip=ip),
+        title = locale().get('mc_status_embed_title', locale).format(edition=edition, version=version, ip=ip),
         timestamp = datetime.now()
         )
     try:
         status = server.status()
-        status_disp = loc.get('mc_status_embed_online', locale).format_map({'online': status.players.online, 'slots': status.players.max})
+        status_disp = locale().get('mc_status_embed_online', locale).format_map({'online': status.players.online, 'slots': status.players.max})
     except:
-        status_disp = loc.get('mc_status_embed_offline', locale)
-    embed.add_field(name = loc.get('mc_status_embed_edition', locale), value = edition)
-    embed.add_field(name = loc.get('mc_status_embed_ip', locale), value = ip)
-    embed.add_field(name = loc.get('mc_status_embed_players', locale), value = status_disp)
+        status_disp = locale().get('mc_status_embed_offline', locale)
+    embed.add_field(name = locale().get('mc_status_embed_edition', locale), value = edition)
+    embed.add_field(name = locale().get('mc_status_embed_ip', locale), value = ip)
+    embed.add_field(name = locale().get('mc_status_embed_players', locale), value = status_disp)
     return embed
 
 class init(commands.Cog):
@@ -81,7 +81,7 @@ class init(commands.Cog):
                     elif item.type == "notify":
                         if unreachable is not True:
                             if ping.status().players.online > 0 and server.online == False:
-                                await self.bot.get_channel(item.ChannelID).send(content = loc.get('mc_notification', item.locale).format(role = item.role, edition = server.edition, ip = server.IP))
+                                await self.bot.get_channel(item.ChannelID).send(content = locale().get('mc_notification', item.locale).format(role = item.role, edition = server.edition, ip = server.IP))
                                 server.online = True
                 except:
                     traceback.print_exc()
@@ -93,7 +93,7 @@ class init(commands.Cog):
         self.bot = bot
         self.bot.add_cog(minecraft_commands(self.bot))
         self.updatestatus.start()
-        print(loc.get('mc_ready'))
+        print(locale().get('mc_ready'))
 
 
 class minecraft_commands(commands.Cog):
@@ -101,12 +101,12 @@ class minecraft_commands(commands.Cog):
     def __init__(self, bot, debug=False):
         self.bot = bot
 
-    minecraft = discord.SlashCommandGroup("minecraft", loc.get('minecraft_desc'))
-    @minecraft.command(description = loc.get('addserver_desc'))
+    minecraft = discord.SlashCommandGroup("minecraft", locale().get('minecraft_desc'))
+    @minecraft.command(description = locale().get('addserver_desc'))
     async def addserver(self, ctx, ip, edition = 'JAVA'):
         guild = guilds.get(guilds.GuildID == ctx.guild.id)
         locale = guild.locale
-        response = await ctx.respond(content = loc.get('processing', locale))
+        response = await ctx.respond(content = locale().get('processing', locale))
         message = await response.original_response()
         status = 'addserver_'
 
@@ -123,13 +123,13 @@ class minecraft_commands(commands.Cog):
         else:
             status = 'channel_denied'
 
-        await message.edit(content=loc.get(status, locale).format_map({'permission': loc.get('manage_webhooks', locale)}))
+        await message.edit(content=locale().get(status, locale).format_map({'permission': locale().get('manage_webhooks', locale)}))
 
-    @minecraft.command(description = loc.get('setnotification_desc'))
+    @minecraft.command(description = locale().get('setnotification_desc'))
     async def setnotification(self, ctx, ip, edition = 'JAVA', sub_role = ''):
         guild = guilds.get(guilds.GuildID == ctx.guild.id)
         locale = guild.locale
-        response = await ctx.respond(content = loc.get('processing', locale))
+        response = await ctx.respond(content = locale().get('processing', locale))
         message = await response.original_response()
         status = 'setnotification_'
 
@@ -149,13 +149,13 @@ class minecraft_commands(commands.Cog):
                 status += 'success'
         else:
             status = 'channel_denied'
-        await message.edit(content=loc.get(status, locale).format_map({'edition': edition[0][0], 'ip': ip, 'permission': loc.get('manage_webhooks', locale)}))
+        await message.edit(content=locale().get(status, locale).format_map({'edition': edition[0][0], 'ip': ip, 'permission': locale().get('manage_webhooks', locale)}))
 
-    @minecraft.command(description = loc.get('stopnotification_desc'))
+    @minecraft.command(description = locale().get('stopnotification_desc'))
     async def stopnotification(self, ctx, ip, edition = 'JAVA'):
         guild = guilds.get(guilds.GuildID == ctx.guild.id)
         locale = guild.locale
-        response = await ctx.respond(content = loc.get('processing', locale))
+        response = await ctx.respond(content = locale().get('processing', locale))
         message = await response.original_response()
         status = 'stopnotification_'
 
@@ -170,7 +170,7 @@ class minecraft_commands(commands.Cog):
             except: status += 'fail'
         else:
             status = 'channel_denied'
-        await message.edit(content=loc.get(status, locale).format_map({'permission': loc.get('manage_webhooks', locale)}))
+        await message.edit(content=locale().get(status, locale).format_map({'permission': locale().get('manage_webhooks', locale)}))
 
 
 

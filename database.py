@@ -27,13 +27,14 @@ class guilds(BaseModel):
 class channels(BaseModel):
     id = PrimaryKeyField()
     ChannelID = BigIntegerField()
+    shareCode = CharField(null = True)
 
 class members(BaseModel):
     id = PrimaryKeyField()
     GuildID = ForeignKeyField(guilds, db_column = 'GuildID')
     UserID = BigIntegerField()
-    msg_count = IntegerField()
-    points = IntegerField()
+    msg_count = IntegerField(default = 0)
+    points = IntegerField(default = 0)
 
 #class role_tags(BaseModel):
 #    id = PrimaryKeyField()

@@ -23,6 +23,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="channel.py" />
     <Compile Include="database.py" />
     <Compile Include="cogs.py" />
     <Compile Include="keepalive.py" />

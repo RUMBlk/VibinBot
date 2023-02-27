@@ -8,73 +8,84 @@ bot_denied: "Sorry, I do not have \"{permission}\" permission in the channel to 
 channel_denied: "Sorry, this command is only available for those who have \"{permission}\" permission in the channel."
 exception: "Seems like something went wrong :/\nPinging dev: <@431451036151185408>" #\n - new line; \t - tab
 #Permissions
-manage_roles: "Manage Roles"
-manage_webhooks: "Manage Webhooks"
-administrator: "Administrator"
+permissions:
+  manage_roles: "Manage Roles"
+  manage_webhooks: "Manage Webhooks"
+  administrator: "Administrator"
+  owner: "Owner"
 #database
 author_not_found: "For some reason you're not in my database, try to post a message at first."
-#Society
-##MODERATION##
-context_report: "Report"
-moderation_desc: "Moderation commands"
-reports_channel_desc: "Set the channel for receiving reports"
-reports_channel_success: "The channel has been successfuly set for receiving reports!"
-report_message_head: "Author: {author}\nOriginal message: {jump_url}\nPosted at: <t:{posted_at}:F>\n\n"
-report_message_content: "Content:\n>>>\n{reported_content}\n<<<\n\n"
-report_message_attach: "Attachments:\n{attachments}\n\n"
-report_message_embeds: "Embeds:\n"
-report_embed_title: "Click here to jump to the message if not deleted"
-report_success: "The message has been successfuly reported!"
-##ADMIN##
-election_system: "Congratulations! <@{elected_members}> have won the <@&role> election!"
-elections_not_candidate: "{claimer} is not a claimer!"
-#role
-elections_desc: "Elections commands"
-elections_add_desc: "Open elections for the specified role"
-elections_add_exists: "The role is already electable! If you wish to cancel elections for the role consider to use \"/elections delete\""
-elections_add_success: "Here you go!"
-#
-elections_delete_desc: "Cancel elections for the specified role"
-elections_delete_success: "Here you go!"
-elections_delete_fail: "There's no elections for the specified role to cancel!"
-#
-elections_claim_desc: "Take participation in points race for the specified electable role"
-elections_claim_exists: "You already claim the role! If you wish to unclaim consider to use \"/elections unclaim\""
-elections_claim_success: "Here you go!"
-#
-elections_unclaim_desc: "Leave race for the specified role"
-elections_unclaim_success: "Here you go!"
-elections_unclaim_fail: "You don't participate in race for the specified role to unclaim it!"
-#
-elections_support_desc: "Support the specified member who claims the role with your cloned points"
-elections_support_exists: "You already support {claimer}!"
-elections_support_success: "Here you go!"
-#
-elections_unsupport_desc: "Unsupport and takes away points from the specified member who claims the role"
-elections_unsupport_success: "Here you go!"
-elections_unsupport_fail: "You don't support {claimer} to unsupport them!"
-#Main commands
-role_offset_desc: "please add this"
-role_offset_success: "Now custom activity roles will be placed after {role_name} role" #{} are variables that are replaced during execution, it's ok to not include them
-#
-claimrole_desc: "Claim a custom role if you're very active or boosted the server!"
-claimrole_a_!top: "Sorry, only top-10 active members of the server can claim a custom role!"
-claimrole_a_success: "Here you go!"
-claimrole_a_fail: "Sorry, only one activity role per member"
-#
-unclaimrole_desc: "Delete a claimed role if you don't want it or want to change it!"
-unclaimrole_a_success: "Here you go!"
-unclaimrole_a_fail: "You don't have an activity role to unclaim!"
-#
-leaderboard_desc: "literally a leaderboard"
-leaderboard_proc: "Counting messages..."
-leaderboard_empty: "The leaderboard is empty, please try later."
-leaderboard_embed_title: "{guild} leaderboard"
-leaderboard_embed_place: "No."
-leaderboard_embed_members: "Members"
-leaderboard_embed_points: "Points"
-leaderboard_embed_sum: "Server value: {server_value}"
-leaderboard_success: "Here you go!"
+
+moderation:
+  context_report: "Report"
+  desc: "Moderation commands"
+  channel:
+    desc: "Set the channel for receiving reports"
+    success: "The channel has been successfuly set for receiving reports!"
+  report:
+    head: "Author: {author}\nOriginal message: {jump_url}\nPosted at: <t:{posted_at}:F>\n\n"
+    content: "Content:\n>>>\n{reported_content}\n<<<\n\n"
+    attach: "Attachments:\n{attachments}\n\n"
+    embeds: "Embeds:\n"
+    title: "Click here to jump to the message if not deleted"
+    success: "The message has been successfuly reported!"
+
+elections:
+  desc: "Elections commands"
+  system: "Congratulations! <@{elected_members}> have won the <@&role> election!"
+  not_candidate: "{claimer} is not a claimer!"
+  no_such_elections: "There's no elections for the specified role!"
+  #role
+  add:
+    desc: "Open elections for the specified role"
+    exists: "The role is already electable! If you wish to cancel elections for the role consider to use \"/elections delete\""
+    success: "Here you go!"
+  delete:
+    desc: "Cancel elections for the specified role"
+    success: "Here you go!"
+    fail: "There's no elections for the specified role to cancel!"
+  claim:
+    desc: "Take participation in points race for the specified electable role"
+    exists: "You already claim the role! If you wish to unclaim consider to use \"/elections unclaim\""
+    success: "Here you go!"
+  unclaim:
+    desc: "Leave race for the specified role"
+    success: "Here you go!"
+    not_candidate: "You don't participate in race for the specified role to unclaim it!"
+  support:
+    desc: "Support the specified member who claims the role with your cloned points"
+    exists: "You already support {claimer}!"
+    success: "Here you go!"
+  unsupport:
+    desc: "Unsupport and takes away points from the specified member who claims the role"
+    success: "Here you go!"
+    fail: "You don't support {claimer} to unsupport them!"
+
+society:
+  desc: "Commands to edit social points behaviour"
+  add:
+    desc: "Add social points to the specified member, negative values also do work!"
+  ignore:
+    desc: "Make the bot ignore the channel, recommended for spam channels"
+  leaderboard:
+    desc: "literally a leaderboard"
+    proc: "Counting messages..."
+    empty: "The leaderboard is empty, please try later."
+    embed:
+      title: "{guild} leaderboard"
+      place: "No."
+      members: "Members"
+      points: "Points"
+      sum: "Server value: {server_value}"
+    success: "Here you go!"
+
+#channel
+channel:
+  desc: "Channel related commands"
+  shareCode_generate:
+    success: "The code has been successfully generated: ```{shareCode}```\n Use /channel shareCode_set command to connect more channels to the network"
+  shareCode_set:
+    success: "The code has been successfully applied!"
 
 ####################################################################################################
 

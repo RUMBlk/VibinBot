@@ -15,6 +15,7 @@ from database import *
 import minecraft
 import moderation
 import elections
+import channel
 import localisation as loc
 
 logging.basicConfig(level=logging.INFO)
@@ -47,14 +48,15 @@ else: BOT_TOKEN = os.environ['BOT_TOKEN']
 #Main cogs
 bot.add_cog(cogs.events(bot))
 bot.add_cog(moderation.moderation(bot))
-bot.add_cog(cogs.points(bot))
+bot.add_cog(cogs.society(bot))
 bot.add_cog(elections.electionsCog(bot))
+bot.add_cog(channel.channel(bot))
 #Minecraft cogs
 #bot.add_cog(minecraft.init(bot)) #init cog loads other Minecraft cogs
 
 @bot.event
 async def on_ready():
     await bot.sync_commands()
-    print(loc.get('bot_is_ready'))
+    print(loc.locale().get('bot_is_ready'))
 
 bot.run(BOT_TOKEN)

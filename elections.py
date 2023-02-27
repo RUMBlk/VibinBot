@@ -17,7 +17,7 @@ class claimers(db.BaseModel):
     id = PrimaryKeyField()
     ElectID = ForeignKeyField(elections, db_column = 'ElectID')
     UserID =  ForeignKeyField(db.members, db_column = 'UserID')
-    Points = IntegerField()
+    Points = IntegerField(default = 0)
 
 class supporters(db.BaseModel):
     id = PrimaryKeyField()
@@ -45,10 +45,12 @@ async def elect(guild, election, guildDB = None):
         if member not in winners: await member.remove_roles(role)
     for winner in winners: await winner.add_roles(role)
     #if guild.system_channel:
-    #    await guild.system_channel.send(loc.get('admin_congrats', guildDB.locale).format_map({'new_admin_id': admin_member.id}))
+    #    await guild.system_channel.send(locale().get('admin_congrats', guildDB.locale).format_map({'new_admin_id': admin_member.id}))
 
 @cogs.on_message_listener
-async def on_message(message, reward):
+async def on_message(args):
+    message = args[1]
+    reward = args[2]
     try:
         guild = db.guilds.get(db.guilds.GuildID == message.guild.id)
         member = db.members.get(db.members.GuildID == guild.id, db.members.UserID == message.author.id)
@@ -68,191 +70,137 @@ async def on_message(message, reward):
 #Discord Cog
 class electionsCog(commands.Cog):
     bot = discord.Bot()
+    locale_class = loc.locale().get('elections')
     def __init__(self, bot):
         self.bot = bot
 
-    elections = discord.SlashCommandGroup("elections", loc.get('elections_desc'))
+    elections = discord.SlashCommandGroup("elections", locale_class.get('desc'))
 
-    @elections.command(description = loc.get('elections_add_desc'))
+    @elections.command(description = locale_class.get('add').get('desc'))
     async def add(self, ctx, role: discord.Role, limit = 1):
-        guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
-        response = await ctx.respond(content = loc.get('processing', guild.locale))
-        message = await response.original_response()
-        status = 'elections_add_'
-        try:
-            if not (ctx.guild.me.guild_permissions.manage_roles and ctx.author == ctx.guild.owner):
-                status = 'bot_denied'
-            elif ctx.author == ctx.guild.owner:
-                    try:
-                        roleDB = db.roles.get(db.roles.RoleID == role.id)
-                    except:
-                        roleDB = db.roles.create(RoleID = role.id)
-                    try:
-                        elections.get(elections.RoleID == roleDB.id)
-                        status += 'exists'
-                    except:
-                        elections.create(GuildID = guild.id, RoleID = roleDB.id, Limit = limit)
-                        status += 'success'
-            else:
-                status = 'channel_denied'
-        except:
-            traceback.print_exc()
-            status = 'exception'
-        await message.edit(content=loc.get(status, guild.locale).format_map({'role_name': role.name, 'permission': loc.get('manage_roles', guild.locale)}))
+        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        locale = loc.locale(guildDB.locale)
+        locale_func = locale.get('elections').get('add')
+        if not (ctx.guild.me.guild_permissions.manage_roles and ctx.author == ctx.guild.owner): answer = locale('bot_denied')
+        elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied')
+        else:
+            roleDB = db.roles.get_or_create(RoleID = role.id)[0]
+            electionsDB = elections.get_or_create(GuildID = guildDB.id, RoleID = roleDB.id)
+            if electionsDB[1] is True: answer = locale_func.get('success')
+            else: answer = locale_func.get('exists')
+            
+        await ctx.respond(content = answer.format_map({'role_name': role.name, 'permission': locale.get('manage_roles')}))
 
-    @elections.command(description = loc.get('elections_delete_desc'))
+    @elections.command(description = locale_class.get('delete').get('desc'))
     async def delete(self, ctx, role: discord.Role):
-        guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
-        response = await ctx.respond(content = loc.get('processing', guild.locale))
-        message = await response.original_response()
-        status = 'elections_delete_'
-        try:
-            if not (ctx.guild.me.guild_permissions.manage_roles and ctx.author == ctx.guild.owner):
-                status = 'bot_denied'
-            elif ctx.author == ctx.guild.owner:
-                    try:
-                        roleDB = db.roles.get(db.roles.RoleID == role.id)
-                        election = elections.get(elections.RoleID == roleDB.id)
-                        election.delete_instance()
-                        status += 'success'
-                    except:
-                        status += 'fail'
-            else:
-                status = 'channel_denied'
-        except:
-            traceback.print_exc()
-            status = 'exception'
-        await message.edit(content=loc.get(status, guild.locale).format_map({'role_name': role.name, 'permission': loc.get('manage_roles', guild.locale)}))
+        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        locale = loc.locale(guildDB.locale)
+        locale_class = locale.get('elections')
+        locale_func = locale_class.get('delete')
+        if not (ctx.guild.me.guild_permissions.manage_roles and ctx.author == ctx.guild.owner): answer = locale('bot_denied')
+        elif ctx.author != ctx.guild.owner: answer = locale('user_denied')
+        else:
+            try:
+                roleDB = db.roles.get(db.roles.RoleID == role.id)
+                election = elections.get(elections.RoleID == roleDB.id)
+                election.delete_instance()
+                answer = locale_func.get('success')
+            except: answer = locale_class.get('no_such_elections')
+        await ctx.respond(content = answer.format_map({'role_name': role.name, 'permission': locale.get('manage_roles')}))
 
 
-    @elections.command(description = loc.get('elections_claim_desc'))
+    @elections.command(description = locale_class.get('claim').get('desc'))
     async def claim(self, ctx, role: discord.Role):
-        guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
-        response = await ctx.respond(content = loc.get('processing', guild.locale))
-        message = await response.original_response()
-        status = 'elections_claim_'
+        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        locale = loc.locale(guildDB.locale)
+        locale_class = locale.get('elections')
+        locale_func = locale_class.get('claim')
+        if not (ctx.guild.me.guild_permissions.manage_roles and ctx.author == ctx.guild.owner): answer = locale('bot_denied')
+        elif ctx.author != ctx.guild.owner: answer = locale('user_denied')
+        else:
+            memberDB = db.members.get(db.members.GuildID == guildDB.id, db.members.UserID == ctx.author.id)
+            try:
+                roleDB = db.roles.get(db.roles.RoleID == role.id)
+                electDB = elections.get(elections.GuildID == guildDB.id, elections.RoleID == roleDB.id)
+                claimersDB = claimers.get_or_create(ElectID = electDB.id, UserID = memberDB.id)
+                if claimersDB[1] is True: answer = locale_func.get('success')
+                else: answer = locale_func.get('exists')
+            except: answer = locale_class.get('no_such_elections')
+        await ctx.respond(content = answer.format_map({'permission': locale.get('manage_roles')}))
 
-        try:
-            if not (ctx.guild.me.guild_permissions.manage_roles):
-                status = 'bot_denied'
-            else:
-                member = db.members.get(db.members.GuildID == guild.id, db.members.UserID == ctx.author.id)
-                try:
-                    roleDB = db.roles.get(db.roles.RoleID == role.id)
-                    elect = elections.get(elections.GuildID == guild.id, elections.RoleID == roleDB.id)
-                    try:
-                        claimers.get(claimers.ElectID == elect.id, claimers.UserID == member.id)
-                        status += 'exists'
-                    except:
-                        claimers.create(ElectID = elect.id, UserID = member.id, Points = 0)
-                        status += 'success'
-                except:
-                    status += 'no_such_elections'
-        except:
-            traceback.print_exc()
-            status = 'exception'
-        await message.edit(content=loc.get(status, guild.locale).format_map({'permission': loc.get('manage_roles', guild.locale)}))
-
-    @elections.command(description = loc.get('elections_unclaim_desc'))
+    @elections.command(description = locale_class.get('unclaim').get('desc'))
     async def unclaim(self, ctx, role: discord.Role):
-        guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
-        response = await ctx.respond(content = loc.get('processing', guild.locale))
-        message = await response.original_response()
-        status = 'elections_unclaim_'
-
-        try:
-            if not (ctx.guild.me.guild_permissions.manage_roles):
-                status = 'bot_denied'
-            else:
-                member = db.members.get(db.members.GuildID == guild.id, db.members.UserID == ctx.author.id)
+        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        locale = loc.locale(guildDB.locale)
+        locale_class = locale.get('elections')
+        locale_func = locale_class.get('unclaim')
+        if not (ctx.guild.me.guild_permissions.manage_roles and ctx.author == ctx.guild.owner): answer = locale('bot_denied')
+        elif ctx.author != ctx.guild.owner: answer = locale('user_denied')
+        else:
+            memberDB = db.members.get(db.members.GuildID == guildDB.id, db.members.UserID == ctx.author.id)
+            try:
+                roleDB = db.roles.get(db.roles.RoleID == role.id)
+                electionDB = elections.get(elections.GuildID == guildDB.id, elections.RoleID == roleDB.id)
                 try:
-                    roleDB = db.roles.get(db.roles.RoleID == role.id)
-                    election = elections.get(elections.GuildID == guild.id, elections.RoleID == roleDB.id)
-                    try:
-                        claim = claimers.get(claimers.ElectID == election.id, claimers.UserID == member.id)
-                        delete_supports=supporters.delete().where(supporters.Claimer==claim.id)
-                        delete_supports.execute()
-                        claim.delete_instance()
-                        await elect(ctx.guild, election, guild)
-                        status += 'success'
-                    except:
-                        traceback.print_exc()
-                        status += 'fail'
-                except:
-                    status += 'no_such_elections'
-        except:
-            traceback.print_exc()
-            status = 'exception'
-        await message.edit(content=loc.get(status, guild.locale).format_map({'permission': loc.get('manage_roles', guild.locale)}))
+                    claimDB = claimers.get(claimers.ElectID == electionDB.id, claimers.UserID == memberDB.id)
+                    delete_supports=supporters.delete().where(supporters.Claimer==claimDB.id)
+                    delete_supports.execute()
+                    claimDB.delete_instance()
+                    await elect(ctx.guild, electionDB, guildDB)
+                    answer = locale_func.get('success')
+                except: answer = locale_func.get('not_candidate')
+            except: answer = locale_class.get('no_such_elections')
+        await ctx.respond(content=answer.format_map({'permission': locale.get('manage_roles')}))
 
-    @elections.command(description = loc.get('elections_support_desc'))
+    @elections.command(description = locale_class.get('support').get('desc'))
     async def support(self, ctx, role: discord.Role, claimer: discord.Member):
-        guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
-        response = await ctx.respond(content = loc.get('processing', guild.locale), ephemeral = True)
-        message = await response.original_response()
-        status = 'elections_support_'
-
-        try:
-            if not (ctx.guild.me.guild_permissions.manage_roles):
-                status = 'bot_denied'
-            else:
+        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        locale = loc.locale(guildDB.locale)
+        locale_class = locale.get('elections')
+        locale_func = locale_class.get('support')
+        if not (ctx.guild.me.guild_permissions.manage_roles and ctx.author == ctx.guild.owner): answer = locale('bot_denied')
+        elif ctx.author != ctx.guild.owner: answer = locale('user_denied')
+        else:
+            authorDB = db.members.get(db.members.GuildID == guildDB.id, db.members.UserID == ctx.author.id)
+            memberDB = db.members.get(db.members.GuildID == guildDB.id, db.members.UserID == claimer.id)
+            try:
+                roleDB = db.roles.get(db.roles.RoleID == role.id)
+                electionDB = elections.get(elections.GuildID == guildDB.id, elections.RoleID == roleDB.id)
                 try:
-                    author = db.members.get(db.members.GuildID == guild.id, db.members.UserID == ctx.author.id)
-                    member = db.members.get(db.members.GuildID == guild.id, db.members.UserID == claimer.id)
-                    roleDB = db.roles.get(db.roles.RoleID == role.id)
-                    election = elections.get(elections.GuildID == guild.id, elections.RoleID == roleDB.id)
-                    try:
-                        claimerDB = claimers.get(claimers.ElectID == election.id, claimers.UserID == member.id)
-                        try:
-                            supporters.get(supporters.UserID == author.id, supporters.Claimer == claimerDB.id)
-                            status += 'exists'
-                        except:
-                            supporters.create(UserID = author.id, Claimer = claimerDB.id)
-                            claimerDB.Points += member.points
-                            claimerDB.save()
-                            await elect(ctx.guild, election, guild)
-                            status += 'success'
-                    except:
-                        status = 'elections_not_candidate'
-                except:
-                   status = "author_not_found"
-        except:
-            traceback.print_exc()
-            status = 'exception'
-        await message.edit(content=loc.get(status, guild.locale).format_map({'permission': loc.get('manage_roles', guild.locale), 'claimer': claimer}))
+                    claimerDB = claimers.get(claimers.ElectID == electionDB.id, claimers.UserID == memberDB.id)
+                    supportDB = supporters.get_or_create(UserID = authorDB.id, Claimer = claimerDB.id)
+                    if supportDB is True:
+                        claimerDB.Points += memberDB.points
+                        claimerDB.save()
+                        await elect(ctx.guild, electionDB, guildDB)
+                        answer = locale_func.get('success')
+                    else: answer = locale_func.get('exists')
+                except: answer = locale_class.get('not_candidate')
+            except: answer = locale_class.get('no_such_elections')
+        await ctx.respond(content=answer.format_map({'permission': locale.get('manage_roles'), 'claimer': claimer}))
 
-    @elections.command(description = loc.get('elections_unsupport_desc'))
+    @elections.command(description = locale_class.get('unsupport').get('desc'))
     async def unsupport(self, ctx, role: discord.Role, claimer: discord.Member):
-        guild = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
-        response = await ctx.respond(content = loc.get('processing', guild.locale), ephemeral = True)
-        message = await response.original_response()
-        status = 'elections_unsupport_'
-
-        try:
-            if not (ctx.guild.me.guild_permissions.manage_roles):
-                status = 'bot_denied'
-            else:
+        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        locale = loc.locale(guildDB.locale)
+        locale_class = locale.get('elections')
+        locale_func = locale_class.get('unsupport')
+        if not (ctx.guild.me.guild_permissions.manage_roles and ctx.author == ctx.guild.owner): answer = locale('bot_denied')
+        elif ctx.author != ctx.guild.owner: answer = locale('user_denied')
+        else:
+            authorDB = db.members.get(db.members.GuildID == guildDB.id, db.members.UserID == ctx.author.id)
+            memberDB = db.members.get(db.members.GuildID == guildDB.id, db.members.UserID == claimer.id)
+            try:
+                roleDB = db.roles.get(db.roles.RoleID == role.id)
+                electionDB = elections.get(elections.GuildID == guildDB.id, elections.RoleID == roleDB.id)
                 try:
-                    author = db.members.get(db.members.GuildID == guild.id, db.members.UserID == ctx.author.id)
-                    member = db.members.get(db.members.GuildID == guild.id, db.members.UserID == claimer.id)
-                    roleDB = db.roles.get(db.roles.RoleID == role.id)
-                    election = elections.get(elections.GuildID == guild.id, elections.RoleID == roleDB.id)
-                    try:
-                        claimerDB = claimers.get(claimers.ElectID == election.id, claimers.UserID == member.id)
-                        try:
-                            support = supporters.get(supporters.UserID == author.id, supporters.Claimer == claimerDB.id)
-                            claimerDB.Points -= author.points
-                            claimerDB.save()
-                            support.delete_instance()
-                            await elect(ctx.guild, election, guild)
-                            status += 'success'
-                        except:
-                            status += 'fail'
-                    except:
-                        status = 'elections_not_candidate'
-                except:
-                   status = "author_not_found"
-        except:
-            traceback.print_exc()
-            status = 'exception'
-        await message.edit(content=loc.get(status, guild.locale).format_map({'permission': loc.get('manage_roles', guild.locale), 'claimer': claimer}))
+                    claimerDB = claimers.get(claimers.ElectID == electionDB.id, claimers.UserID == memberDB.id)
+                    support = supporters.get(supporters.UserID == authorDB.id, supporters.Claimer == claimerDB.id)
+                    claimerDB.Points -= authorDB.points
+                    claimerDB.save()
+                    support.delete_instance()
+                    await elect(ctx.guild, electionDB, guildDB)
+                    answer = locale_func.get('success')
+                except: answer = locale_class.get('not_candidate')
+            except: answer = locale_class.get('no_such_elections')
+        await ctx.respond(content=answer.format_map({'permission': locale.get('manage_roles'), 'claimer': claimer}))
