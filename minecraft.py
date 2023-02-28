@@ -6,7 +6,7 @@ from mcstatus import JavaServer
 from mcstatus import BedrockServer
 import discord
 from discord.ext import commands, tasks
-import cogs
+import society
 import traceback
 from localisation import locale
 

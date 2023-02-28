@@ -6,7 +6,6 @@ import localisation as loc
 from uuid import uuid4
 import binascii
 import os
-import cogs
 
 class channel(commands.Cog):
     bot = discord.Bot()
@@ -34,26 +33,49 @@ class channel(commands.Cog):
 
     channel = discord.SlashCommandGroup("channel", locale_class.get('desc'))
 
-    @channel.command(description = locale_class.get('shareCode_generate').get('desc'))
-    async def sharecode_generate(self, ctx):
+    @channel.command(description = locale_class.get('sharecode').get('desc'))
+    async def sharecode(self, ctx, sharecode = None):
         guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
-        locale_func = locale.get('channel').get('shareCode_generate')
+        locale_func = locale.get('channel').get('sharecode')
+        locale_map = {'shareCode': sharecode, 'guild': ctx.guild.name, 'channel': ctx.channel.name, 'permission': locale.get('manage_webhooks')}
         if not ctx.channel.permissions_for(ctx.guild.me).manage_webhooks: answer = locale.get("bot_denied")
         elif ctx.channel.permissions_for(ctx.author).manage_webhooks:
-            sharecode = str(uuid4())
             channelDB = db.channels.get_or_create(ChannelID = ctx.channel.id)[0]
+            if sharecode is None:
+                sharecode = str(uuid4())
+                answer = locale_func.get('generated')
+            elif channelDB.shareCode == sharecode: answer = locale_func.get('exists')
+            else: 
+                shareCode_channels =  db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.ChannelID != ctx.channel.id))
+                for channel in shareCode_channels:
+                    channel = self.bot.get_channel(channel.ChannelID)
+                    await channel.send(content = locale_func.get('on_join').format_map(locale_map))
+                answer = locale_func.get('set')
             channelDB.shareCode = sharecode
             channelDB.save()
-            answer = locale_func.get('success')
-        await ctx.respond(content = answer.format_map({'shareCode': sharecode, 'permission': locale.get('manage_webhooks')}))
+        await ctx.respond(content = answer.format_map(locale_map), ephemeral = True)
 
-    @channel.command(description = locale_class.get('shareCode_set').get('desc'))
-    async def sharecode_set(self, ctx, sharecode):
-        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
-        locale = loc.locale(guildDB.locale)
-        locale_func = locale.get('channel').get('shareCode_set')
-        channelDB = db.channels.get_or_create(ChannelID = ctx.channel.id)[0]
-        channelDB.shareCode = sharecode
-        channelDB.save()
-        await ctx.respond(content = locale_func('success').format_map({'shareCode': sharecode}))
+    #@channel.command(description = locale_class.get('shareCode_generate').get('desc'))
+    #async def sharecode_generate(self, ctx):
+    #    guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
+    #    locale = loc.locale(guildDB.locale)
+    #    locale_func = locale.get('channel').get('shareCode_generate')
+    #    if not ctx.channel.permissions_for(ctx.guild.me).manage_webhooks: answer = locale.get("bot_denied")
+    #    elif ctx.channel.permissions_for(ctx.author).manage_webhooks:
+    #        sharecode = str(uuid4())
+    #        channelDB = db.channels.get_or_create(ChannelID = ctx.channel.id)[0]
+    #        channelDB.shareCode = sharecode
+    #        channelDB.save()
+    #        answer = locale_func.get('success')
+    #    await ctx.respond(content = answer.format_map({'shareCode': sharecode, 'permission': locale.get('manage_webhooks')}))
+
+    #@channel.command(description = locale_class.get('shareCode_set').get('desc'))
+    #async def sharecode_set(self, ctx, sharecode):
+    #    guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
+    #    locale = loc.locale(guildDB.locale)
+    #    locale_func = locale.get('channel').get('shareCode_set')
+    #    channelDB = db.channels.get_or_create(ChannelID = ctx.channel.id)[0]
+    #    channelDB.shareCode = sharecode
+    #    channelDB.save()
+    #    await ctx.respond(content = locale_func('success').format_map({'shareCode': sharecode}))

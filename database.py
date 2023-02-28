@@ -34,7 +34,7 @@ class members(BaseModel):
     GuildID = ForeignKeyField(guilds, db_column = 'GuildID')
     UserID = BigIntegerField()
     msg_count = IntegerField(default = 0)
-    points = IntegerField(default = 0)
+    Points = IntegerField(default = 0)
 
 #class role_tags(BaseModel):
 #    id = PrimaryKeyField()

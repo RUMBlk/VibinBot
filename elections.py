@@ -4,7 +4,8 @@ from discord.ext import tasks, commands
 import localisation as loc
 from peewee import *
 import database as db
-import cogs
+import society
+import tabulate
 
 #Database
 class elections(db.BaseModel):
@@ -27,24 +28,39 @@ class supporters(db.BaseModel):
 
 db.db.create_tables([elections, claimers, supporters])
 #Db shortcuts
-def get_election_group(guildDB, role):
+async def get_election_group(guildDB, role):
     roleDB = db.roles.get_or_none(db.roles.RoleID == role.id)
     electionDB = elections.get_or_none(elections.GuildID == guildDB.id, elections.RoleID == roleDB.id)
     return {'roleDB': roleDB, 'electionDB': electionDB}
 
-def get_claimer_group(guildDB, role, memberDB):
-    db_group = get_election_group(guildDB, role)
-    db_group['claimerDB'] = claimers.get_or_none(claimers.ElectID == db_group.electionDB.id, claimers.UserID == memberDB.id)
+async def get_claimer_group(guildDB, role, memberDB):
+    db_group = await get_election_group(guildDB, role)
+    print(db_group)
+    if db_group['electionDB'] is not None: db_group['claimerDB'] = claimers.get_or_none(claimers.ElectID == db_group['electionDB'].id, claimers.UserID == memberDB.id)
+    else: db_group['claimerDB'] = None
     return db_group
 
-def get_support_group(guildDB, role, memberDB, authorDB):
-    db_group = get_claimer_group(guildDB, role, memberDB)
-    db_group['supportDB'] = supporters.get_or_none(supporters.UserID == authorDB.id, supporters.Claimer == db_group.claimerDB.id)
+async def get_support_group(guildDB, role, memberDB, authorDB):
+    db_group = await get_claimer_group(guildDB, role, memberDB)
+    if db_group['claimerDB'] is not None: db_group['supportDB'] = supporters.get_or_none(supporters.UserID == authorDB.id, supporters.Claimer == db_group['claimerDB'].id)
+    else: db_group['supportDB'] = None
     return db_group
 #Database end
 
+#Defines
+async def claimerToName(ctx, claimer):
+    try:
+        member = db.members.get(db.members.id == claimer.UserID)
+        UserID = ctx.guild.get_member(member.UserID)
+        if UserID is None: UserID = await ctx.guild.fetch_member(member.UserID)
+        member_name = UserID.display_name
+        if len(member_name) > 18: member_name = f'{member_name[:18]}...' 
+    except:
+        member_name = member.UserID
+    return member_name
+
 async def elect(guild, election, guildDB = None):
-    if guildDB is None: guildDB = db.guilds.get(db.guilds.GuildID == message.guild.id)
+    if guildDB is None: guildDB = db.guilds.get(db.guilds.GuildID == guild.id)
     claims = claimers.select().where(claimers.ElectID == election.id).order_by(claimers.Points.desc())
     role = guild.get_role(db.roles.get(db.roles.id == election.RoleID).RoleID)
     winners = []
@@ -62,7 +78,7 @@ async def elect(guild, election, guildDB = None):
     #if guild.system_channel:
     #    await guild.system_channel.send(locale().get('admin_congrats', guildDB.locale).format_map({'new_admin_id': admin_member.id}))
 
-@cogs.on_message_listener
+@society.on_message_listener
 async def on_message(args):
     message = args[1]
     reward = args[2]
@@ -115,13 +131,13 @@ class electionsCog(commands.Cog):
         if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied')
         elif ctx.author != ctx.guild.owner: answer = locale('user_denied')
         else:
-            with get_election_group(guildDB, role) as db_group:
-                if db_group.electionDB is None: answer = locale_class.get('no_such_elections')
-                else:
-                    roleDB = db.roles.get(db.roles.RoleID == role.id)
-                    election = elections.get(elections.RoleID == roleDB.id)
-                    election.delete_instance()
-                    answer = locale_func.get('success')
+            db_group = await get_election_group(guildDB, role)
+            if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
+            else:
+                roleDB = db.roles.get(db.roles.RoleID == role.id)
+                election = elections.get(elections.RoleID == roleDB.id)
+                election.delete_instance()
+                answer = locale_func.get('success')
         await ctx.respond(content = answer.format_map({'role_name': role.name, 'permission': locale.get('manage_roles')}))
 
 
@@ -134,12 +150,12 @@ class electionsCog(commands.Cog):
         if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied')
         else:
             memberDB = db.members.get_or_create(GuildID = guildDB.id, UserID = ctx.author.id)[0]
-            with get_election_group(guildDB, role) as db_group:
-                if db_group.electionDB is None: answer = locale_class.get('no_such_elections')
-                else:
-                    claimersDB = claimers.get_or_create(ElectID = db_group.electionDB.id, UserID = memberDB.id)
-                    if claimersDB[1] is True: answer = locale_func.get('success')
-                    else: answer = locale_func.get('exists')
+            db_group = await get_claimer_group(guildDB, role, memberDB)
+            if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
+            elif db_group['claimerDB'] is not None: answer = locale_func.get('exists')
+            else:
+                claimers.get_or_create(ElectID = db_group['electionDB'].id, UserID = memberDB.id)
+                answer = locale_func.get('success')
         await ctx.respond(content = answer.format_map({'permission': locale.get('manage_roles')}))
 
     @elections.command(description = locale_class.get('unclaim').get('desc'))
@@ -151,16 +167,16 @@ class electionsCog(commands.Cog):
         if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied')
         else:
             memberDB = db.members.get_or_create(GuildID = guildDB.id, UserID = ctx.author.id)[0]
-            with get_election_group(guildDB, role) as db_group:
-                if db_group.electionDB is None: locale_class.get('no_such_elections')
-                elif db_group.claimerDB is None: answer = locale_func.get('not_candidate')
-                else:
-                    claimDB = claimers.get_or_none(claimers.ElectID == db_group.electionDB.id, claimers.UserID == memberDB.id)
-                    delete_supports=supporters.delete().where(supporters.Claimer==claimDB.id)
-                    delete_supports.execute()
-                    claimDB.delete_instance()
-                    await elect(ctx.guild, db_group.electionDB, guildDB)
-                    answer = locale_func.get('success')
+            db_group = await get_claimer_group(guildDB, role, memberDB)
+            if db_group['electionDB'] is None: locale_class.get('no_such_elections')
+            elif db_group['claimerDB'] is None: answer = locale_func.get('not_candidate')
+            else:
+                claimDB = claimers.get_or_none(claimers.ElectID == db_group['electionDB'].id, claimers.UserID == memberDB.id)
+                delete_supports=supporters.delete().where(supporters.Claimer==claimDB.id)
+                delete_supports.execute()
+                claimDB.delete_instance()
+                await elect(ctx.guild, db_group['electionDB'], guildDB)
+                answer = locale_func.get('success')
         await ctx.respond(content=answer.format_map({'permission': locale.get('manage_roles')}))
 
     @elections.command(description = locale_class.get('support').get('desc'))
@@ -175,15 +191,15 @@ class electionsCog(commands.Cog):
             memberDB = db.members.get_or_none(db.members.GuildID == guildDB.id, db.members.UserID == claimer.id)
             if memberDB is None: answer = locale_class.get('not_candidate')
             else:
-                with get_support_group(guildDB, role, memberDB, authorDB) as db_group:
-                    if db_group.electionDB is None: answer = locale_class.get('no_such_elections')
-                    elif db_group.claimerDB is None: answer = locale_class.get('not_candidate')
-                    elif db_group.supportDB is not None: locale_func.get("exists")
-                    else:
-                        db_group.claimerDB.Points += memberDB.points
-                        db.branch.claimerDB.save()
-                        await elect(ctx.guild, db_group.electionDB, guildDB)
-                        answer = locale_func.get('success')
+                db_group = await get_support_group(guildDB, role, memberDB, authorDB)
+                if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
+                elif db_group['claimerDB'] is None: answer = locale_class.get('not_candidate')
+                elif db_group['supportDB'] is not None: locale_func.get("exists")
+                else:
+                    db_group['claimerDB'].Points += memberDB.Points
+                    db_group['claimerDB'].save()
+                    await elect(ctx.guild, db_group['electionDB'], guildDB)
+                    answer = locale_func.get('success')
         await ctx.respond(content=answer.format_map({'permission': locale.get('manage_roles'), 'claimer': claimer}))
 
     @elections.command(description = locale_class.get('unsupport').get('desc'))
@@ -198,14 +214,28 @@ class electionsCog(commands.Cog):
             memberDB = db.members.get_or_none(db.members.GuildID == guildDB.id, db.members.UserID == claimer.id)
             if memberDB is None: answer = locale_class.get('not_candidate')
             else:
-                with get_support_group(guildDB, role, memberDB, authorDB) as db_group:
-                    if db_group.electionDB is None: answer = locale_class.get('no_such_elections')
-                    elif db_group.claimerDB is None: answer = locale_class.get('not_candidate')
-                    elif db_group.supportDB is None: locale_class.get("not_supporter")
-                    else:
-                        db_group.claimerDB.Points -= authorDB.points
-                        db_group.claimerDB.save()
-                        db_group.supportDB.delete_instance()
-                        await elect(ctx.guild, db_group.electionDB, guildDB)
-                        answer = locale_func.get('success')
+                db_group = await get_support_group(guildDB, role, memberDB, authorDB)
+                if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
+                elif db_group['claimerDB'] is None: answer = locale_class.get('not_candidate')
+                elif db_group['supportDB'] is None: answer = locale_class.get("not_supporter")
+                else:
+                    db_group['claimerDB'].Points -= authorDB.Points
+                    db_group['claimerDB'].save()
+                    db_group['supportDB'].delete_instance()
+                    await elect(ctx.guild, db_group['electionDB'], guildDB)
+                    answer = locale_func.get('success')
         await ctx.respond(content=answer.format_map({'permission': locale.get('manage_roles'), 'claimer': claimer}))
+
+    @elections.command(description = locale_class.get('leaderboard').get('desc'))
+    async def leaderboard(self, ctx, role: discord.Role):
+        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
+        locale = loc.locale(guildDB.locale)
+        locale_class = locale.get('elections')
+        locale_func = locale_class.get('leaderboard')
+        db_group = await get_election_group(guildDB, role)
+        claimersDB = claimers.select().where(claimers.ElectID == db_group['electionDB'].id)
+        leaderboard, summ = await society.form_leaderboard(ctx, claimerToName, claimersDB)
+        for row in leaderboard:
+            if row[2] > 0: row[2] = f'{row[2]/(summ/100)}%'
+        leaderboard = '```' + tabulate.tabulate(leaderboard, headers = [locale_func.get('embed').get('place'), locale_func.get('embed').get('claimers'), locale_func.get('embed').get('share')], tablefmt = 'github') + '```'
+        await ctx.respond(content=leaderboard)

@@ -10,7 +10,7 @@ import debug as lib_debug
 
 #Modules from local lib folder
 import keepalive
-import cogs
+import society
 from database import *
 import minecraft
 import moderation
@@ -46,9 +46,8 @@ if debug:
    bot.add_cog(lib_debug.debug_commands(bot))
 else: BOT_TOKEN = os.environ['BOT_TOKEN']
 #Main cogs
-bot.add_cog(cogs.events(bot))
 bot.add_cog(moderation.moderation(bot))
-bot.add_cog(cogs.society(bot))
+bot.add_cog(society.society(bot))
 bot.add_cog(elections.electionsCog(bot))
 bot.add_cog(channel.channel(bot))
 #Minecraft cogs

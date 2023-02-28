@@ -33,8 +33,9 @@ moderation:
 elections:
   desc: "Elections commands"
   system: "Congratulations! <@{elected_members}> have won the <@&role> election!"
-  not_candidate: "{claimer} is not a claimer!"
   no_such_elections: "There's no elections for the specified role!"
+  not_candidate: "{claimer} is not a claimer!"
+  not_supporter: "You don't support {claimer} to unsupport them!"
   #role
   add:
     desc: "Open elections for the specified role"
@@ -60,13 +61,22 @@ elections:
     desc: "Unsupport and takes away points from the specified member who claims the role"
     success: "Here you go!"
     fail: "You don't support {claimer} to unsupport them!"
+  leaderboard:
+    desc: ""
+    embed:
+      title: "{role} leaderboard"
+      place: "No."
+      claimers: "Claimers"
+      share: "Share"
 
 society:
   desc: "Commands to edit social points behaviour"
   add:
     desc: "Add social points to the specified member, negative values also do work!"
+    success: "Added {amount} social credit to {member}"
   ignore:
     desc: "Make the bot ignore the channel, recommended for spam channels"
+    success: "The bot won't count social credit in the channel now!"
   leaderboard:
     desc: "literally a leaderboard"
     proc: "Counting messages..."
@@ -76,12 +86,17 @@ society:
       place: "No."
       members: "Members"
       points: "Points"
-      sum: "Server value: {server_value}"
+      summ: "Server value: {server_value}"
     success: "Here you go!"
 
 #channel
 channel:
   desc: "Channel related commands"
+  sharecode:
+    generated: "The code has been successfully generated: ```{shareCode}```\n Use \"/channel sharecode\" command to connect more channels to the network"
+    exists: "The code is already set!"
+    set: "The share code {shareCode} has been successfully set!"
+    on_join: "{guild} #{channel} has joined the network!"
   shareCode_generate:
     success: "The code has been successfully generated: ```{shareCode}```\n Use /channel shareCode_set command to connect more channels to the network"
   shareCode_set:
