@@ -36,7 +36,7 @@ class channel(commands.Cog):
 
     @channel.command(description = locale_class.get('shareCode_generate').get('desc'))
     async def sharecode_generate(self, ctx):
-        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('channel').get('shareCode_generate')
         if not ctx.channel.permissions_for(ctx.guild.me).manage_webhooks: answer = locale.get("bot_denied")
@@ -50,7 +50,7 @@ class channel(commands.Cog):
 
     @channel.command(description = locale_class.get('shareCode_set').get('desc'))
     async def sharecode_set(self, ctx, sharecode):
-        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('channel').get('shareCode_set')
         channelDB = db.channels.get_or_create(ChannelID = ctx.channel.id)[0]

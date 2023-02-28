@@ -72,7 +72,7 @@ class society(commands.Cog):
 
     @society.command(description = locale_class.get('add').get('desc'))
     async def add(self, ctx, member: discord.Member, amount: int):
-        guildDB = guilds.get(guilds.GuildID == ctx.guild.id)
+        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('owner')})
         else:
@@ -82,9 +82,9 @@ class society(commands.Cog):
             answer = locale.get('success')
         await ctx.respond(content=answer)
 
-    @society.command(description = locale_class.get('ignore').get('ignore'))
+    @society.command(description = locale_class.get('ignore').get('desc'))
     async def ignore(self, ctx, channel: discord.TextChannel):
-        guildDB = guilds.get(guilds.GuildID == ctx.guild.id)
+        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('ignore')
         if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('owner')})
@@ -98,7 +98,7 @@ class society(commands.Cog):
 
     @society.command(description = locale_class.get('leaderboard').get('desc'))
     async def leaderboard(self, ctx):
-        guildDB = guilds.get(guilds.GuildID == ctx.guild.id)
+        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('society').get('leaderboard')
         leaderboard = []

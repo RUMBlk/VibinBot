@@ -17,7 +17,7 @@ class moderation(commands.Cog):
 
     @moderation.command(description = locale_class.get('channel').get('desc'))
     async def channel(self, ctx):
-        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('moderation').get('channel')
         if not ctx.channel.permissions_for(ctx.guild.me).send_messages: answer = locale.get('bot_denied')
@@ -29,7 +29,7 @@ class moderation(commands.Cog):
 
     @bot.message_command(name=locale_class.get('context_report'))
     async def report(self, ctx, message: discord.Message):
-        guildDB = db.guilds.get(db.guilds.GuildID == ctx.guild.id)
+        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get(f'{__class__.__name__}').get('report')
 
