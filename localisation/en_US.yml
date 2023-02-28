@@ -93,10 +93,13 @@ society:
 channel:
   desc: "Channel related commands"
   sharecode:
-    generated: "The code has been successfully generated: ```{shareCode}```\n Use \"/channel sharecode\" command to connect more channels to the network"
+    desc: "Sets share code or generates if empty, input \"none\" to delete the channel's share code"
+    generated: "The code has been successfully generated: ```{shareCode}```\n Use \"/channel sharecode\" command to connect more channels to the network. To unsubscribe set the code to ```none```"
+    delete: "You have left the network!"
     exists: "The code is already set!"
-    set: "The share code {shareCode} has been successfully set!"
+    set: "The share code {shareCode} has been successfully set! To unsubscribe set the code to ```none```"
     on_join: "{guild} #{channel} has joined the network!"
+    on_left: "{guild} #{channel} has left the network!"
   shareCode_generate:
     success: "The code has been successfully generated: ```{shareCode}```\n Use /channel shareCode_set command to connect more channels to the network"
   shareCode_set:
