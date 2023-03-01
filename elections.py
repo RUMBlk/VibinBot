@@ -105,8 +105,8 @@ class electionsCog(commands.Cog):
         guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('elections').get('add')
-        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied')
-        elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied')
+        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied').format_map({'role_name': role.name, 'permission': locale.get('manage_roles')})
+        elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied').format_map({'role_name': role.name, 'permission': locale.get('owner')})
         else:
             roleDB = db.roles.get_or_create(RoleID = role.id)[0]
             electionsDB = elections.get_or_create(GuildID = guildDB.id, RoleID = roleDB.id)
@@ -115,7 +115,7 @@ class electionsCog(commands.Cog):
             if electionsDB[1] is True: answer = locale_func.get('success')
             else: answer = locale_func.get('exists')
             
-        await ctx.respond(content = answer.format_map({'role_name': role.name, 'permission': locale.get('manage_roles')}))
+        await ctx.respond(content = answer)
 
     @elections.command(description = locale_class.get('delete').get('desc'))
     async def delete(self, ctx, role: discord.Role):
@@ -123,8 +123,8 @@ class electionsCog(commands.Cog):
         locale = loc.locale(guildDB.locale)
         locale_class = locale.get('elections')
         locale_func = locale_class.get('delete')
-        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied')
-        elif ctx.author != ctx.guild.owner: answer = locale('user_denied')
+        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied').format_map({'role_name': role.name, 'permission': locale.get('manage_roles')})
+        elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied').format_map({'role_name': role.name, 'permission': locale.get('owner')})
         else:
             db_group = await get_election_group(guildDB, role)
             if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
@@ -139,7 +139,7 @@ class electionsCog(commands.Cog):
                 delete_claims.execute()
                 electionDB.delete_instance()
                 answer = locale_func.get('success')
-        await ctx.respond(content = answer.format_map({'role_name': role.name, 'permission': locale.get('manage_roles')}))
+        await ctx.respond(content = answer)
 
 
     @elections.command(description = locale_class.get('claim').get('desc'))

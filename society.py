@@ -77,6 +77,8 @@ class society(commands.Cog):
         guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('society').get('add')
+        ephemeral = True
+        if ctx.channel.permissions_for(ctx.guild.me).send_messages: ephemeral = False
         if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('owner')})
         else:
             memberDB = db.members.get_or_create(GuildID = guildDB.id, UserID = member.id)[0]
@@ -90,6 +92,8 @@ class society(commands.Cog):
         guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('ignore')
+        ephemeral = True
+        if ctx.channel.permissions_for(ctx.guild.me).send_messages: ephemeral = False
         if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('owner')})
         else:
             channelDB = db.channels.get_or_create(ChannelID = channel.id)
