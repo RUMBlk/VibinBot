@@ -7,10 +7,22 @@ from uuid import uuid4
 import binascii
 import os
 
-async def transmit(bot, shareCode_channels, content, embeds = None, stickers = None):
+async def transmit(bot, shareCode_channels, content, embeds = None, stickers = None, webhook = False, member = None):
     for channel in shareCode_channels:
         channel = bot.get_channel(channel.ChannelID)
-        await channel.send(content = content, embeds = embeds, stickers = stickers)
+        if webhook is False:
+           await channel.send(content = content, embeds = embeds, stickers = stickers)
+        else:
+            bot_name = bot.user.name
+            webhook = None
+            webhooks = await channel.webhooks()
+            for item in webhooks:
+                if item.name == bot_name:
+                    webhook = item
+                    break
+            if webhook is None: webhook = await channel.create_webhook(name=bot_name, avatar = bot.user.avatar, reason = "Required for the bot to execute share code network commands!")
+            if member is None: await webhook.send(content = content, embeds = embeds)
+            else: await webhook.send(content = content, embeds = embeds, username = member.display_name, avatar_url = member.display_avatar)
 
 class channel(commands.Cog):
     bot = discord.Bot()
@@ -31,7 +43,7 @@ class channel(commands.Cog):
                 for item in message.attachments:
                     attachments += f'\n{item.url}'
 
-                await transmit(bot, shareCode_channels, content = message.content + attachments, embeds = message.embeds, stickers = message.stickers)
+                await transmit(bot, shareCode_channels, content = message.content + attachments, embeds = message.embeds, stickers = message.stickers, webhook = True, member = message.author)
 
 
     channel = discord.SlashCommandGroup("channel", locale_class.get('desc'))

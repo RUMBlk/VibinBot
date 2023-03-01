@@ -233,6 +233,8 @@ class electionsCog(commands.Cog):
         locale = loc.locale(guildDB.locale)
         locale_class = locale.get('elections')
         locale_func = locale_class.get('leaderboard')
+        ephemeral = True
+        if ctx.channel.permissions_for(ctx.guild.me).send_messages: ephemeral = False
         db_group = await get_election_group(guildDB, role)
         if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
         else:
@@ -242,4 +244,4 @@ class electionsCog(commands.Cog):
                 if row[2] > 0: row[2] = f'{(row[2]/(summ/100)):0.2f}%'
                 else: row[2] = f'{row[2]:0.2f}%'
             answer = '```' + tabulate.tabulate(leaderboard, headers = [locale_func.get('embed').get('place'), locale_func.get('embed').get('claimers'), locale_func.get('embed').get('share')], tablefmt = 'github') + '```'
-        await ctx.respond(content=answer)
+        await ctx.respond(content=answer, ephemeral = ephemeral)
