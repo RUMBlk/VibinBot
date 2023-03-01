@@ -20,7 +20,7 @@ async def transmit(bot, shareCode_channels, content, embeds = None, stickers = N
                 if item.name == bot_name:
                     webhook = item
                     break
-            if webhook is None: webhook = await channel.create_webhook(name=bot_name, avatar = bot.user.display_avatar, reason = "Required for the bot to execute share code network commands!")
+            if webhook is None: webhook = await channel.create_webhook(name=bot_name, reason = "Required for the bot to execute share code network commands!")
             if member is None: await webhook.send(content = content, embeds = embeds)
             else: await webhook.send(content = content, embeds = embeds, username = member.display_name, avatar_url = member.display_avatar)
 
