@@ -79,7 +79,7 @@ class society(commands.Cog):
         locale_func = locale.get('society').get('add')
         ephemeral = True
         if ctx.channel.permissions_for(ctx.guild.me).send_messages: ephemeral = False
-        if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('owner')})
+        if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('permissions').get('owner')})
         else:
             memberDB = db.members.get_or_create(GuildID = guildDB.id, UserID = member.id)[0]
             memberDB.Points += amount
@@ -94,7 +94,7 @@ class society(commands.Cog):
         locale_func = locale.get('ignore')
         ephemeral = True
         if ctx.channel.permissions_for(ctx.guild.me).send_messages: ephemeral = False
-        if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('owner')})
+        if ctx.author != ctx.guild.owner: answer = locale.get('bot_denied').format_map({'permission': locale.get('permissions').get('owner')})
         else:
             channelDB = db.channels.get_or_create(ChannelID = channel.id)
             points_ignore.get_or_create(Channel = channelDB[0].id)

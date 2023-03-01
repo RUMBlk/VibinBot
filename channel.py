@@ -63,16 +63,16 @@ class channel(commands.Cog):
             elif sharecode.lower() == 'none':
                 shareCode_channels = db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.ChannelID != ctx.channel.id))
                 sharecode = None
-                await transmit(self.bot, shareCode_channels,content = locale_func.get('on_left').format_map({'shareCode': sharecode, 'guild': ctx.guild.name, 'channel': ctx.channel.name, 'permission': locale.get('manage_webhooks')}))
+                await transmit(self.bot, shareCode_channels,content = locale_func.get('on_left').format_map({'shareCode': sharecode, 'guild': ctx.guild.name, 'channel': ctx.channel.name, 'permission': locale.get('permissions').get('manage_webhooks')}))
                 answer = locale_func.get('delete')
             elif channelDB.shareCode == sharecode: answer = locale_func.get('exists')
             else: 
                 shareCode_channels = db.channels.select().where((db.channels.shareCode == sharecode) & (db.channels.ChannelID != ctx.channel.id))
-                await transmit(self.bot, shareCode_channels,content = locale_func.get('on_join').format_map({'shareCode': sharecode, 'guild': ctx.guild.name, 'channel': ctx.channel.name, 'permission': locale.get('manage_webhooks')}))
+                await transmit(self.bot, shareCode_channels,content = locale_func.get('on_join').format_map({'shareCode': sharecode, 'guild': ctx.guild.name, 'channel': ctx.channel.name, 'permission': locale.get('permissions').get('manage_webhooks')}))
                 answer = locale_func.get('set')
             channelDB.shareCode = sharecode
             channelDB.save()
-        await ctx.respond(content = answer.format_map({'shareCode': sharecode, 'guild': ctx.guild.name, 'channel': ctx.channel.name, 'permission': locale.get('manage_webhooks')}), ephemeral = True)
+        await ctx.respond(content = answer.format_map({'shareCode': sharecode, 'guild': ctx.guild.name, 'channel': ctx.channel.name, 'permission': locale.get('permissions').get('manage_webhooks')}), ephemeral = True)
 
     #@channel.command(description = locale_class.get('shareCode_generate').get('desc'))
     #async def sharecode_generate(self, ctx):
@@ -86,7 +86,7 @@ class channel(commands.Cog):
     #        channelDB.shareCode = sharecode
     #        channelDB.save()
     #        answer = locale_func.get('success')
-    #    await ctx.respond(content = answer.format_map({'shareCode': sharecode, 'permission': locale.get('manage_webhooks')}))
+    #    await ctx.respond(content = answer.format_map({'shareCode': sharecode, 'permission': locale.get('permissions').get('manage_webhooks')}))
 
     #@channel.command(description = locale_class.get('shareCode_set').get('desc'))
     #async def sharecode_set(self, ctx, sharecode):

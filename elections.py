@@ -105,8 +105,9 @@ class electionsCog(commands.Cog):
         guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('elections').get('add')
-        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied').format_map({'role_name': role.name, 'permission': locale.get('manage_roles')})
-        elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied').format_map({'role_name': role.name, 'permission': locale.get('owner')})
+        req_perms = locale.get('permissions').get('send_messages') + ' and ' + locale('permissions').get('manage_roles')
+        if not (ctx.guild.me.guild_permissions.manage_roles) or not (ctx.guild.me.guild_permissions.send_messages): answer = locale('bot_denied').format_map({'permission': req_perms})
+        elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied').format_map({'permission': locale.get('permissions').get('owner')})
         else:
             roleDB = db.roles.get_or_create(RoleID = role.id)[0]
             electionsDB = elections.get_or_create(GuildID = guildDB.id, RoleID = roleDB.id)
@@ -123,8 +124,9 @@ class electionsCog(commands.Cog):
         locale = loc.locale(guildDB.locale)
         locale_class = locale.get('elections')
         locale_func = locale_class.get('delete')
-        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied').format_map({'role_name': role.name, 'permission': locale.get('manage_roles')})
-        elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied').format_map({'role_name': role.name, 'permission': locale.get('owner')})
+        req_perms = locale('permissions').get('send_messages') + ' and ' + locale('permissions').get('manage_roles')
+        if not (ctx.guild.me.guild_permissions.manage_roles) or not (ctx.guild.me.guild_permissions.send_messages): answer = locale('bot_denied').format_map({'permission': req_perms})
+        elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied').format_map({'permission': locale.get('permissions').get('owner')})
         else:
             db_group = await get_election_group(guildDB, role)
             if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
@@ -157,7 +159,7 @@ class electionsCog(commands.Cog):
             else:
                 claimers.get_or_create(ElectID = db_group['electionDB'].id, UserID = memberDB.id)
                 answer = locale_func.get('success')
-        await ctx.respond(content = answer.format_map({'permission': locale.get('manage_roles')}))
+        await ctx.respond(content = answer.format_map({'permission': locale.get('permissions').get('manage_roles')}))
 
     @elections.command(description = locale_class.get('unclaim').get('desc'))
     async def unclaim(self, ctx, role: discord.Role):
@@ -178,7 +180,7 @@ class electionsCog(commands.Cog):
                 claimDB.delete_instance()
                 await elect(ctx.guild, db_group['electionDB'], guildDB)
                 answer = locale_func.get('success')
-        await ctx.respond(content=answer.format_map({'permission': locale.get('manage_roles')}))
+        await ctx.respond(content=answer.format_map({'permission': locale.get('permissions').get('manage_roles')}))
 
     @elections.command(description = locale_class.get('support').get('desc'))
     async def support(self, ctx, role: discord.Role, claimer: discord.Member):
@@ -201,7 +203,7 @@ class electionsCog(commands.Cog):
                     db_group['claimerDB'].save()
                     await elect(ctx.guild, db_group['electionDB'], guildDB)
                     answer = locale_func.get('success')
-        await ctx.respond(content=answer.format_map({'permission': locale.get('manage_roles'), 'claimer': claimer}), ephemeral = True)
+        await ctx.respond(content=answer.format_map({'permission': locale.get('permissions').get('manage_roles'), 'claimer': claimer}), ephemeral = True)
 
     @elections.command(description = locale_class.get('unsupport').get('desc'))
     async def unsupport(self, ctx, role: discord.Role, claimer: discord.Member):
@@ -225,7 +227,7 @@ class electionsCog(commands.Cog):
                     db_group['supportDB'].delete_instance()
                     await elect(ctx.guild, db_group['electionDB'], guildDB)
                     answer = locale_func.get('success')
-        await ctx.respond(content=answer.format_map({'permission': locale.get('manage_roles'), 'claimer': claimer}), ephemeral = True)
+        await ctx.respond(content=answer.format_map({'permission': locale.get('permissions').get('manage_roles'), 'claimer': claimer}), ephemeral = True)
 
     @elections.command(description = locale_class.get('leaderboard').get('desc'))
     async def leaderboard(self, ctx, role: discord.Role):

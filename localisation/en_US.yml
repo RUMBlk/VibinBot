@@ -13,6 +13,7 @@ permissions:
   manage_webhooks: "Manage Webhooks"
   administrator: "Administrator"
   owner: "Owner"
+  send_messages: "Send Messages"
 #database
 author_not_found: "For some reason you're not in my database, try to post a message at first."
 
