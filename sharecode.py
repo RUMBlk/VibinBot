@@ -70,7 +70,6 @@ class transmitted():
                     webhooks = await channel.webhooks()
                     self.webhook = discord.utils.get(webhooks, name = self.bot.user.name)
                     self.fetchedMessage = await channel.history(around = message.created_at).find(lambda m: m.author.name == f'{message.author.name}#{tag}' and m.content == message.content and m.embeds == message.embeds)
-                    return self.fetchedMessage
         return self
         
     async def delete(self):
