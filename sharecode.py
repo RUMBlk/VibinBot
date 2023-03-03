@@ -88,6 +88,7 @@ class sharecode(commands.Cog):
         if isinstance(message.channel, discord.TextChannel):
             webhooks = await message.channel.webhooks()
             webhook = discord.utils.get(webhooks, name = self.bot.user.name)
+            print(message)
             if message.author.id != webhook.id:
                 guildDB = db.guilds.get(db.guilds.GuildID == message.guild.id)
                 channelDB = db.channels.get_or_create(ChannelID = message.channel.id)[0]
