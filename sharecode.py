@@ -74,6 +74,8 @@ class transmitted():
         return self
         
     async def delete(self):
+        print(self.fetchedMessage)
+        print(self.webhook)
         if hasattr(self, 'fetchedMessage'): await self.webhook.delete_message(message_id = self.fetchedMessage.id)
     async def edit(self, content, embeds):
         if hasattr(self, 'fetchedMessage'): await self.webhook.edit_message(message_id = self.fetchedMessage.id, content = content, embeds = embeds)
@@ -90,8 +92,6 @@ class sharecode(commands.Cog):
             webhooks = await message.channel.webhooks()
             webhook = discord.utils.get(webhooks, name = self.bot.user.name)
             if webhook is not None: webhook = webhook.id
-            print(message)
-            print(webhook)
             if message.author.id != webhook:
                 guildDB = db.guilds.get(db.guilds.GuildID == message.guild.id)
                 channelDB = db.channels.get_or_create(ChannelID = message.channel.id)[0]
@@ -106,14 +106,12 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message_delete")
     async def on_message_delete(self, message):
-        await asyncio.sleep(1000)
         if message.channel.permissions_for(message.guild.me).manage_webhooks: 
             tm = await transmitted().fetch(self.bot, message)
             await tm.delete()
 
     @commands.Cog.listener("on_message_edit")
     async def on_message_edit(self, before, after):
-        await asyncio.sleep(1000)
         if message.channel.permissions_for(message.guild.me).manage_webhooks: 
             tm = await transmitted().fetch(self.bot, before)
             await tm.edit(content = after.content, embeds = after.embeds)
