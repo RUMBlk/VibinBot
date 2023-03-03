@@ -38,7 +38,7 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
                 if embeds is None: embeds = message.embeds
             else: mimic = False
 
-            mentions = re.findall(r'@.*#\d\d\d\d', content)
+            mentions = re.findall(r'@.*#\d\d\d\d', content)[1:]
             for item in network:
                 channel = bot.get_channel(item.ChannelID)
                 webhooks = await channel.webhooks()
@@ -70,7 +70,7 @@ class transmitted():
                     channel = self.bot.get_channel(item.ChannelID)
                     webhooks = await channel.webhooks()
                     self.webhook = discord.utils.get(webhooks, name = self.bot.user.name)
-                    self.fetchedMessage = await channel.history(around = message.created_at).find(lambda m: m.author.name == f'{message.author.name}#{tag}' and m.content == message.content and m.embeds == message.embeds)
+                    self.fetchedMessage = await channel.history(around = message.created_at).find(lambda m: f'#{tag}' in m.author.name and m.content == message.content and m.embeds == message.embeds)
         return self
         
     async def delete(self):
@@ -112,7 +112,7 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message_edit")
     async def on_message_edit(self, before, after):
-        if message.channel.permissions_for(message.guild.me).manage_webhooks: 
+        if after.channel.permissions_for(after.guild.me).manage_webhooks: 
             tm = await transmitted().fetch(self.bot, before)
             await tm.edit(content = after.content, embeds = after.embeds)
             
