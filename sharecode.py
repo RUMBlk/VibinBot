@@ -8,6 +8,7 @@ import binascii
 import os
 import re
 from hashlib import sha256
+import asyncio
 
 async def hashtag(name, mention, salt = os.getenv('salt')):
     if salt is not None: mention = mention+salt
@@ -105,12 +106,14 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message_delete")
     async def on_message_delete(self, message):
+        await asyncio.sleep(1000)
         if message.channel.permissions_for(message.guild.me).manage_webhooks: 
             tm = await transmitted().fetch(self.bot, message)
             await tm.delete()
 
     @commands.Cog.listener("on_message_edit")
     async def on_message_edit(self, before, after):
+        await asyncio.sleep(1000)
         if message.channel.permissions_for(message.guild.me).manage_webhooks: 
             tm = await transmitted().fetch(self.bot, before)
             await tm.edit(content = after.content, embeds = after.embeds)
