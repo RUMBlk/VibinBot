@@ -88,9 +88,10 @@ class sharecode(commands.Cog):
         if isinstance(message.channel, discord.TextChannel) and message.channel.permissions_for(message.guild.me).manage_webhooks:
             webhooks = await message.channel.webhooks()
             webhook = discord.utils.get(webhooks, name = self.bot.user.name)
+            if webhook is not None: webhook = webhook.id
             print(message)
             print(webhook)
-            if message.author.id != webhook.id:
+            if message.author.id != webhook:
                 guildDB = db.guilds.get(db.guilds.GuildID == message.guild.id)
                 channelDB = db.channels.get_or_create(ChannelID = message.channel.id)[0]
                 if(channelDB.shareCode is not None):
@@ -104,7 +105,7 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message_delete")
     async def on_message_delete(self, message):
-        if ctx.channel.permissions_for(message.guild.me).manage_webhooks: 
+        if message.channel.permissions_for(message.guild.me).manage_webhooks: 
             tm = await transmitted().fetch(self.bot, message)
             await tm.delete()
 
