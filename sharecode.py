@@ -85,7 +85,7 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def on_message(self, message):
-        if isinstance(message.channel, discord.TextChannel) and ctx.channel.permissions_for(ctx.guild.me).manage_webhooks:
+        if isinstance(message.channel, discord.TextChannel) and message.channel.permissions_for(message.guild.me).manage_webhooks:
             webhooks = await message.channel.webhooks()
             webhook = discord.utils.get(webhooks, name = self.bot.user.name)
             print(message)
@@ -104,13 +104,13 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message_delete")
     async def on_message_delete(self, message):
-        if ctx.channel.permissions_for(ctx.guild.me).manage_webhooks: 
+        if ctx.channel.permissions_for(message.guild.me).manage_webhooks: 
             tm = await transmitted().fetch(self.bot, message)
             await tm.delete()
 
     @commands.Cog.listener("on_message_edit")
     async def on_message_edit(self, before, after):
-        if not ctx.channel.permissions_for(ctx.guild.me).manage_webhooks: 
+        if message.channel.permissions_for(message.guild.me).manage_webhooks: 
             tm = await transmitted().fetch(self.bot, before)
             await tm.edit(content = after.content, embeds = after.embeds)
             
