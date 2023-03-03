@@ -29,6 +29,7 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
 
     webhooks = await sender.webhooks()
     webhook = discord.utils.get(webhooks, name = bot.user.name)
+    if webhook is None: webhook = await sender.create_webhook(name=bot.user.name, reason = "Required for the bot to execute share code network commands!")
     if author_id != webhook.id:
         channelDB = db.channels.get_or_create(ChannelID = sender.id)[0]
         network = db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.shareCode != None) & (db.channels.ChannelID != sender.id))
@@ -47,13 +48,16 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
                 for mention in mentions:
                     split = mention.split('#')
                     ping = discord.utils.get(channel.guild.members, name=split[0][1:], discriminator=split[1])
-                    if ping is not None: content.replace(mention, f'<@{ping.id}>')
+                    if ping is not None:
+                        content = content.replace(mention, f'{ping.mention}')
 
                 if webhook is None: webhook = await channel.create_webhook(name=bot.user.name, reason = "Required for the bot to execute share code network commands!")
                 if mimic is False: await webhook.send(content = content, embeds = embeds, avatar_url = bot.user.display_avatar)
                 else: await webhook.send(content = content, embeds = embeds, username = tag, avatar_url = message.author.display_avatar)
 
 class transmitted():
+    webhook = None
+    fetchedMessage = None
 
     async def fetch(self, bot, message):
         self.bot = bot 
@@ -74,9 +78,9 @@ class transmitted():
         return self
         
     async def delete(self):
-        if hasattr(self, 'fetchedMessage'): await self.webhook.delete_message(message_id = self.fetchedMessage.id)
+        if self.fetchedMessage is not None: await self.webhook.delete_message(message_id = self.fetchedMessage.id)
     async def edit(self, content, embeds):
-        if hasattr(self, 'fetchedMessage'): await self.webhook.edit_message(message_id = self.fetchedMessage.id, content = content, embeds = embeds)
+        if self.fetchedMessage is not None: await self.webhook.edit_message(message_id = self.fetchedMessage.id, content = content, embeds = embeds)
 
 class sharecode(commands.Cog):
     bot = discord.Bot()
