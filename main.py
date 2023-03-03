@@ -15,7 +15,7 @@ from database import *
 import minecraft
 import moderation
 import elections
-import channel
+import sharecode
 import localisation as loc
 
 logging.basicConfig(level=logging.INFO)
@@ -49,7 +49,7 @@ else: BOT_TOKEN = os.environ['BOT_TOKEN']
 bot.add_cog(moderation.moderation(bot))
 bot.add_cog(society.society(bot))
 bot.add_cog(elections.electionsCog(bot))
-bot.add_cog(channel.channel(bot))
+bot.add_cog(sharecode.sharecode(bot))
 #Minecraft cogs
 #bot.add_cog(minecraft.init(bot)) #init cog loads other Minecraft cogs
 

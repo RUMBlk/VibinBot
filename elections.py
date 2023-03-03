@@ -247,3 +247,29 @@ class electionsCog(commands.Cog):
                 else: row[2] = f'{row[2]:0.2f}%'
             answer = '```' + tabulate.tabulate(leaderboard, headers = [locale_func.get('embed').get('place'), locale_func.get('embed').get('claimers'), locale_func.get('embed').get('share')], tablefmt = 'github') + '```'
         await ctx.respond(content=answer, ephemeral = ephemeral)
+
+    #@elections.command(description = locale_class.get('supportboard').get('desc'))
+    #async def supportboard(self, ctx, role: discord.Role):
+    #    guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
+    #    locale = loc.locale(guildDB.locale)
+    #    locale_class = locale.get('elections')
+    #    locale_func = locale_class.get('supportboard')
+    #    db_group = await get_election_group(guildDB, role)
+    #    else:
+    #        authorDB = db.members.get_or_create(UserID = ctx.author.id)
+    #        electionDB = await get_election_group(guildDB, role)['electionDB']
+    #        if electionDB is None: answer = locale_class.get('no_such_elections')
+    #        else:
+    #            supportboard = []
+    #            claimsDB = claimers.select().where(claimers.ElectID == electionDB.id)
+    #            for claim in claimsDB:
+    #                support = supporters.get_or_none(supporters.UserID == authorDB.id, supporters.Claimer==claim.id)
+    #                claimer_id = db.members.get(db.members.id == claim.UserID)
+    #                self.bot.get_user()
+    #                supportboard.append([support])
+    #            delete_claims=claimers.delete().where(claimers.ElectID == electionDB.id)
+    #            delete_claims.execute()
+    #            electionDB.delete_instance()
+    #            answer = locale_func.get('success')
+    #        answer = '```' + tabulate.tabulate(leaderboard, headers = [locale_func.get('embed').get('place'), locale_func.get('embed').get('claimers'), locale_func.get('embed').get('share')], tablefmt = 'github') + '```'
+    #    await ctx.respond(content=answer, ephemeral = True)
