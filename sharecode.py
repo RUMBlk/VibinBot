@@ -63,7 +63,8 @@ class transmitted():
         self.bot = bot 
         self.message = message
         webhooks = await message.channel.webhooks()
-        webhook = discord.utils.get(webhooks, name = bot.user.name).id
+        webhook = discord.utils.get(webhooks, name = bot.user.name)
+        if webhook is not None: webhook = webhook.id
         if message.author.id != webhook:
             tag = await hashtag(message.author.name, message.author.mention)
             tag = tag.split('#')[-1]
@@ -92,7 +93,8 @@ class sharecode(commands.Cog):
     async def on_message(self, message):
         if isinstance(message.channel, discord.TextChannel) and message.channel.permissions_for(message.guild.me).manage_webhooks:
             webhooks = await message.channel.webhooks()
-            webhook = discord.utils.get(webhooks, name = self.bot.user.name).id
+            webhook = discord.utils.get(webhooks, name = self.bot.user.name)
+            if webhook is not None: webhook = webhook.id
             if message.author.id != webhook:
                 guildDB = db.guilds.get(db.guilds.GuildID == message.guild.id)
                 channelDB = db.channels.get_or_create(ChannelID = message.channel.id)[0]
