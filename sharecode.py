@@ -47,7 +47,7 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
                 for mention in mentions:
                     split = mention.split('#')
                     ping = discord.utils.get(channel.guild.members, name=split[0][1:], discriminator=split[1])
-                    if ping is not None: content.replace(mention, ping.mention)
+                    if ping is not None: content.replace(mention, f'<@{ping.id}>')
 
                 if webhook is None: webhook = await channel.create_webhook(name=bot.user.name, reason = "Required for the bot to execute share code network commands!")
                 if mimic is False: await webhook.send(content = content, embeds = embeds, avatar_url = bot.user.display_avatar)
@@ -74,8 +74,6 @@ class transmitted():
         return self
         
     async def delete(self):
-        print(self.fetchedMessage)
-        print(self.webhook)
         if hasattr(self, 'fetchedMessage'): await self.webhook.delete_message(message_id = self.fetchedMessage.id)
     async def edit(self, content, embeds):
         if hasattr(self, 'fetchedMessage'): await self.webhook.edit_message(message_id = self.fetchedMessage.id, content = content, embeds = embeds)
