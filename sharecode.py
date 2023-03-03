@@ -38,7 +38,7 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
                 if embeds is None: embeds = message.embeds
             else: mimic = False
 
-            mentions = re.findall(r'@.*#\d\d\d\d', content)[1:]
+            mentions = re.findall(r'@.*#\d\d\d\d', content)
             for item in network:
                 channel = bot.get_channel(item.ChannelID)
                 webhooks = await channel.webhooks()
@@ -46,7 +46,7 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
 
                 for mention in mentions:
                     split = mention.split('#')
-                    ping = discord.utils.get(channel.guild.members, name=split[0], discriminator=split[1])
+                    ping = discord.utils.get(channel.guild.members, name=split[0][1:], discriminator=split[1])
                     if ping is not None: content.replace(mention, ping)
 
                 if webhook is None: webhook = await channel.create_webhook(name=bot.user.name, reason = "Required for the bot to execute share code network commands!")
