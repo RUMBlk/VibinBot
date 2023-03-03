@@ -25,7 +25,7 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
     if message is not None: 
         sender = message.channel
         author_id = message.author.id
-        tag = await hashtag(message.author.name, message.author.mention)
+        tag = await hashtag(message.author.display_name, message.author.mention)
 
     webhooks = await sender.webhooks()
     webhook = discord.utils.get(webhooks, name = bot.user.name)
