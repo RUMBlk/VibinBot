@@ -20,6 +20,12 @@ async def hashtag(name, mention, salt = os.getenv('salt')):
         lat4 += chr(num)
     return f'{name}#{lat4}'
 
+async def attachments_to_url(message):
+    attachments = ''
+    for item in message.attachments:
+        attachments += f'\n{item.url}'
+    return attachments
+
 async def transmit(bot, message = None, sender = None, content = None, embeds = [], mimic = True):
     author_id = None
     if message is not None: 
@@ -75,6 +81,7 @@ class transmitted():
                     channel = self.bot.get_channel(item.ChannelID)
                     webhooks = await channel.webhooks()
                     self.webhook = discord.utils.get(webhooks, name = self.bot.user.name)
+                    #attachments = await attachments_to_url(message).split('\n')
                     self.fetchedMessage = await channel.history(around = message.created_at).find(lambda m: f'#{tag}' in m.author.name and m.content == message.content and m.embeds == message.embeds)
         return self
         
@@ -91,6 +98,7 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def on_message(self, message):
+        print(message.attachments)
         if isinstance(message.channel, discord.TextChannel) and message.channel.permissions_for(message.guild.me).manage_webhooks:
             webhooks = await message.channel.webhooks()
             webhook = discord.utils.get(webhooks, name = self.bot.user.name)
@@ -101,11 +109,8 @@ class sharecode(commands.Cog):
                 if(channelDB.shareCode is not None):
                     shareCode_channels =  db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.ChannelID != message.channel.id))
 
-                    attachments = ''
-                    for item in message.attachments:
-                        attachments += f'\n{item.url}'
-
-                    await transmit(self.bot, message, message.content + attachments)
+                    attachments = await attachments_to_url(message)
+                    await transmit(self.bot, message, content = message.content + attachments)
 
     @commands.Cog.listener("on_message_delete")
     async def on_message_delete(self, message):
