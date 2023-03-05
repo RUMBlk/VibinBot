@@ -100,8 +100,6 @@ class transmitted():
                     webhooks = await channel.webhooks()
                     self.webhook = discord.utils.get(webhooks, name = self.bot.user.name)
                     self.fetchedMessage = await channel.history(around = message.created_at, limit=11).find(lambda m: f'#{tag}' in m.author.name and m.content == formated_content) 
-                    async for msg in channel.history(around = message.created_at, limit = 11):
-                        print(msg.content)
 
         return self
         
