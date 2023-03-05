@@ -116,7 +116,8 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def on_message(self, message):
-        if isinstance(message.channel, discord.TextChannel) and message.type == discord.MessageType.default and message.channel.permissions_for(message.guild.me).manage_webhooks:
+        msgType_whitelist = [discord.MessageType.default, discord.MessageType.reply]
+        if isinstance(message.channel, discord.TextChannel) and message.type in msgType_whitelist and message.channel.permissions_for(message.guild.me).manage_webhooks:
             webhooks = await message.channel.webhooks()
             webhook = discord.utils.get(webhooks, name = self.bot.user.name)
             if webhook is not None: webhook = webhook.id
