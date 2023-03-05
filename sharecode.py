@@ -20,11 +20,27 @@ async def hashtag(name, mention, salt = os.getenv('salt')):
         lat4 += chr(num)
     return f'{name}#{lat4}'
 
-async def attachments_to_url(message):
-    attachments = ''
-    for item in message.attachments:
-        attachments += f'\n{item.url}'
-    return attachments
+async def attachments_to_url(attachments):
+    urls = ''
+    for item in attachments:
+        urls += f'{item.url}\n'
+    return urls[:-1]
+
+async def format(bot, content, reference = None, attachments = None):
+    if hasattr(reference, 'message_id'):
+        channel = await bot.fetch_channel(reference.channel_id)
+        reference = await channel.fetch_message(reference.message_id)
+        tag = await hashtag(reference.author.display_name, reference.author.mention)
+        reply = f'> >{tag}: '
+        if reference.content != '':
+            reply_content = re.sub(r'> >.*\n', '', reference.content, 1)[:80-len(reply)]
+        else: reply_content = 'Attachment(s) or/and embed(s)'
+        content = f'{reply}{reply_content}\n{content}'
+    if attachments != []:
+        urls = await attachments_to_url(attachments)
+        if content != '': content = f'{content}\n{urls}'
+        else: content = urls
+    return content
 
 async def transmit(bot, message = None, sender = None, content = None, embeds = [], mimic = True):
     author_id = None
@@ -43,6 +59,7 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
             if message is not None:
                 if content is None: content = message.content
                 if embeds is None: embeds = message.embeds
+                content = await format(bot, content, message.reference, message.attachments)
             else: mimic = False
 
             mentions = re.findall(r'@.*#\d\d\d\d', content)
@@ -77,12 +94,13 @@ class transmitted():
             channelDB = db.channels.get_or_create(ChannelID = message.channel.id)[0]
             network = db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.shareCode != None) & (db.channels.ChannelID != message.channel.id))
             if network is not None:
+                formated_content = await format(bot, message.content, message.reference, message.attachments)
                 for item in network:
                     channel = self.bot.get_channel(item.ChannelID)
                     webhooks = await channel.webhooks()
                     self.webhook = discord.utils.get(webhooks, name = self.bot.user.name)
-                    #attachments = await attachments_to_url(message).split('\n')
-                    self.fetchedMessage = await channel.history(around = message.created_at).find(lambda m: f'#{tag}' in m.author.name and m.content == message.content and m.embeds == message.embeds)
+                    self.fetchedMessage = await channel.history(around = message.created_at, limit=11).find(lambda m: f'#{tag}' in m.author.name and m.content == formated_content) 
+
         return self
         
     async def delete(self):
@@ -98,8 +116,7 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def on_message(self, message):
-        print(message.attachments)
-        if isinstance(message.channel, discord.TextChannel) and message.channel.permissions_for(message.guild.me).manage_webhooks:
+        if isinstance(message.channel, discord.TextChannel) and message.type == discord.MessageType.default and message.channel.permissions_for(message.guild.me).manage_webhooks:
             webhooks = await message.channel.webhooks()
             webhook = discord.utils.get(webhooks, name = self.bot.user.name)
             if webhook is not None: webhook = webhook.id
@@ -108,21 +125,20 @@ class sharecode(commands.Cog):
                 channelDB = db.channels.get_or_create(ChannelID = message.channel.id)[0]
                 if(channelDB.shareCode is not None):
                     shareCode_channels =  db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.ChannelID != message.channel.id))
-
-                    attachments = await attachments_to_url(message)
-                    await transmit(self.bot, message, content = message.content + attachments)
+                    await transmit(self.bot, message)
 
     @commands.Cog.listener("on_message_delete")
     async def on_message_delete(self, message):
-        if message.channel.permissions_for(message.guild.me).manage_webhooks: 
+        if isinstance(message.channel, discord.TextChannel) and message.channel.permissions_for(message.guild.me).manage_webhooks:
             tm = await transmitted().fetch(self.bot, message)
             await tm.delete()
 
     @commands.Cog.listener("on_message_edit")
     async def on_message_edit(self, before, after):
-        if after.channel.permissions_for(after.guild.me).manage_webhooks: 
+        if isinstance(message.channel, discord.TextChannel) and message.channel.permissions_for(message.guild.me).manage_webhooks:
             tm = await transmitted().fetch(self.bot, before)
-            await tm.edit(content = after.content, embeds = after.embeds)
+            formated_content = await format(self.bot, after.content, after.reference, after.attachments)
+            await tm.edit(content = formated_content, embeds = after.embeds)
             
 
     channel = discord.SlashCommandGroup("sharecode", locale_class.get('desc'))
