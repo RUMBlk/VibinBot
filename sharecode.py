@@ -136,7 +136,7 @@ class sharecode(commands.Cog):
 
     @commands.Cog.listener("on_message_edit")
     async def on_message_edit(self, before, after):
-        if isinstance(message.channel, discord.TextChannel) and message.channel.permissions_for(message.guild.me).manage_webhooks:
+        if isinstance(before.channel, discord.TextChannel) and before.channel.permissions_for(before.guild.me).manage_webhooks:
             tm = await transmitted().fetch(self.bot, before)
             formated_content = await format(self.bot, after.content, after.reference, after.attachments)
             await tm.edit(content = formated_content, embeds = after.embeds)
