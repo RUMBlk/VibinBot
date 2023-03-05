@@ -101,6 +101,10 @@ sharecode:
     exists: "The code is already set!"
   remove:
     success: "The code has been sucessfully removed!"
+  deleteMsg:
+    desc: "Use this function in case the message is old or was posted before the bot restarted/was updated!"
+    success: "The request to delete all transmitted messages copied from {messageID} has been successfuly sent!\nYou can safely delete the message."
+    fail: "You're not author of the message!"
   on_join: "{guild} #{channel} has joined the network!"
   on_left: "{guild} #{channel} has left the network!"
 

@@ -100,6 +100,8 @@ class transmitted():
                     webhooks = await channel.webhooks()
                     self.webhook = discord.utils.get(webhooks, name = self.bot.user.name)
                     self.fetchedMessage = await channel.history(around = message.created_at, limit=11).find(lambda m: f'#{tag}' in m.author.name and m.content == formated_content) 
+                    async for msg in channel.history(around = message.created_at, limit = 11):
+                        print(msg.content)
 
         return self
         
@@ -197,4 +199,19 @@ class sharecode(commands.Cog):
             channelDB.shareCode = None
             channelDB.save()
             answer = locale_func.get('success')
+        await ctx.respond(content = answer.format_map(locale_map), ephemeral = True)
+
+    @channel.command(description = locale_class.get('desc'))
+    async def deletemsg(self, ctx, message_id):
+        guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
+        locale = loc.locale(guildDB.locale)
+        locale_class = locale.get('sharecode')
+        locale_func = locale_class.get('deleteMsg')
+        locale_map = {'messageID': message_id}
+        message = await ctx.channel.fetch_message(message_id)
+        if ctx.author == message.author:
+            tm = await transmitted().fetch(self.bot, message)
+            await tm.delete()
+            answer = locale_func.get('success')
+        else: answer = locale_func.get('fail')
         await ctx.respond(content = answer.format_map(locale_map), ephemeral = True)
