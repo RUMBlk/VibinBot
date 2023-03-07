@@ -27,13 +27,28 @@ async def attachments_to_url(attachments):
     return urls[:-1]
 
 async def format(bot, content, reference = None, attachments = None):
+    ids = re.findall(r'(?<=\<@)[0-9]+(?=\>)', content)
+    for id in ids:
+        mention = f'<@{id}>'
+        try:
+            user = await bot.fetch_user(id)
+            tag = await hashtag(user.display_name, mention)
+        except:
+            tag = await hashtag('UnknownUser', mention)
+        content = content.replace(mention, f'**{tag}**')
+
     if hasattr(reference, 'message_id'):
         channel = await bot.fetch_channel(reference.channel_id)
         reference = await channel.fetch_message(reference.message_id)
-        tag = await hashtag(reference.author.display_name, reference.author.mention)
-        reply = f'> >{tag}: '
+        refname = reference.author.display_name
+        if reference.is_system is True: tag = f'{refname}[SYSTEM]'
+        elif reference.author.bot is False: tag = await hashtag(refname, reference.author.mention)
+        else: tag = f'{refname}[B]'
+        reply = f'> >**{tag}**: '
         if reference.content != '':
-            reply_content = re.sub(r'> >.*\n', '', reference.content, 1)[:80-len(reply)]
+            reply_len = 80-len(reply)
+            reply_content = re.sub(r'> >.*\n', '', reference.content, 1)[:reply_len].split('\n')[0]
+            if len(reference.content) > reply_len: reply_content = f'{reply_content[:-3]}...'
         else: reply_content = 'Attachment(s) or/and embed(s)'
         content = f'{reply}{reply_content}\n{content}'
     if attachments != []:
@@ -49,6 +64,11 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
         author_id = message.author.id
         tag = await hashtag(message.author.display_name, message.author.mention)
 
+        if content is None: content = message.content
+        if embeds is None: embeds = message.embeds
+        content = await format(bot, content, message.reference, message.attachments)
+    else: mimic = False
+
     webhooks = await sender.webhooks()
     webhook = discord.utils.get(webhooks, name = bot.user.name)
     if webhook is None: webhook = await sender.create_webhook(name=bot.user.name, reason = "Required for the bot to execute share code network commands!")
@@ -56,23 +76,10 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
         channelDB = db.channels.get_or_create(ChannelID = sender.id)[0]
         network = db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.shareCode != None) & (db.channels.ChannelID != sender.id))
         if network is not None:
-            if message is not None:
-                if content is None: content = message.content
-                if embeds is None: embeds = message.embeds
-                content = await format(bot, content, message.reference, message.attachments)
-            else: mimic = False
-
-            mentions = re.findall(r'@.*#\d\d\d\d', content)
             for item in network:
                 channel = bot.get_channel(item.ChannelID)
                 webhooks = await channel.webhooks()
                 webhook = discord.utils.get(webhooks, name = bot.user.name) #await get_webhook(webhooks, bot.user.name)
-
-                for mention in mentions:
-                    split = mention.split('#')
-                    ping = discord.utils.get(channel.guild.members, name=split[0][1:], discriminator=split[1])
-                    if ping is not None:
-                        content = content.replace(mention, f'{ping.mention}')
 
                 if webhook is None: webhook = await channel.create_webhook(name=bot.user.name, reason = "Required for the bot to execute share code network commands!")
                 if mimic is False: await webhook.send(content = content, embeds = embeds, avatar_url = bot.user.display_avatar)
