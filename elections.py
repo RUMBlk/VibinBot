@@ -255,6 +255,7 @@ class electionsCog(commands.Cog):
     #    locale_class = locale.get('elections')
     #    locale_func = locale_class.get('supportboard')
     #    db_group = await get_election_group(guildDB, role)
+    #    if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
     #    else:
     #        authorDB = db.members.get_or_create(UserID = ctx.author.id)
     #        electionDB = await get_election_group(guildDB, role)['electionDB']

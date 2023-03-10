@@ -37,7 +37,13 @@ async def format(bot, content, reference = None, attachments = None):
             tag = await hashtag('UnknownUser', mention)
         content = content.replace(mention, f'**{tag}**')
 
+    content = re.sub(r'<@&[0-9]*>', '**[role]**', content)
+
     mention_blacklist = ['@everyone', '@here']
+    for mention in mention_blacklist:
+        content = content.replace(mention, f'**{mention[1:]}**')
+    #a   
+
     if hasattr(reference, 'message_id'):
         channel = await bot.fetch_channel(reference.channel_id)
         reference = await channel.fetch_message(reference.message_id)
