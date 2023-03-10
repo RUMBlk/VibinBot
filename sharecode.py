@@ -27,23 +27,6 @@ async def attachments_to_url(attachments):
     return urls[:-1]
 
 async def format(bot, content, reference = None, attachments = None):
-    ids = re.findall(r'(?<=\<@)[0-9]+(?=\>)', content)
-    for id in ids:
-        mention = f'<@{id}>'
-        try:
-            user = await bot.fetch_user(id)
-            tag = await hashtag(user.display_name, mention)
-        except:
-            tag = await hashtag('UnknownUser', mention)
-        content = content.replace(mention, f'**{tag}**')
-
-    content = re.sub(r'<@&[0-9]*>', '**[role]**', content)
-
-    mention_blacklist = ['@everyone', '@here']
-    for mention in mention_blacklist:
-        content = content.replace(mention, f'**{mention[1:]}**')
-    #a   
-
     if hasattr(reference, 'message_id'):
         channel = await bot.fetch_channel(reference.channel_id)
         reference = await channel.fetch_message(reference.message_id)
@@ -62,6 +45,23 @@ async def format(bot, content, reference = None, attachments = None):
         urls = await attachments_to_url(attachments)
         if content != '': content = f'{content}\n{urls}'
         else: content = urls
+
+    ids = re.findall(r'(?<=\<@)[0-9]+(?=\>)', content)
+    for id in ids:
+        mention = f'<@{id}>'
+        try:
+            user = await bot.fetch_user(id)
+            tag = await hashtag(user.display_name, mention)
+        except:
+            tag = await hashtag('UnknownUser', mention)
+        content = content.replace(mention, f'**{tag}**')
+
+    content = re.sub(r'<@&[0-9]*>', '**[role]**', content)
+
+    mention_blacklist = ['@everyone', '@here']
+    for mention in mention_blacklist:
+        content = content.replace(mention, f'**{mention[1:]}**')
+    #a   
     return content
 
 async def transmit(bot, message = None, sender = None, content = None, embeds = [], mimic = True):
