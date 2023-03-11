@@ -127,9 +127,11 @@ class sharecode(commands.Cog):
     locale_class = loc.locale().get('sharecode')
     def __init__(self, bot):
         self.bot = bot
+        self.locked_messages = []
 
     @commands.Cog.listener("on_message")
     async def on_message(self, message):
+        self.locked_messages.append(message)
         msgType_whitelist = [discord.MessageType.default, discord.MessageType.reply]
         if isinstance(message.channel, discord.TextChannel) and message.type in msgType_whitelist and message.channel.permissions_for(message.guild.me).manage_webhooks:
             webhooks = await message.channel.webhooks()
@@ -141,19 +143,28 @@ class sharecode(commands.Cog):
                 if(channelDB.shareCode is not None):
                     shareCode_channels =  db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.ChannelID != message.channel.id))
                     await transmit(self.bot, message)
+        self.locked_messages.remove(message)
 
     @commands.Cog.listener("on_message_delete")
     async def on_message_delete(self, message):
+        while message in self.locked_messages:
+            await asyncio.sleep(1)
+        self.locked_messages.append(message)
         if isinstance(message.channel, discord.TextChannel) and message.channel.permissions_for(message.guild.me).manage_webhooks:
             tm = await transmitted().fetch(self.bot, message)
             await tm.delete()
+        self.locked_messages.remove(message)
 
     @commands.Cog.listener("on_message_edit")
     async def on_message_edit(self, before, after):
+        while before in self.locked_messages:
+            await asyncio.sleep(1)
+        self.locked_messages.append(before)
         if isinstance(before.channel, discord.TextChannel) and before.channel.permissions_for(before.guild.me).manage_webhooks:
             tm = await transmitted().fetch(self.bot, before)
             formated_content = await format(self.bot, after.content, after.reference, after.attachments)
             await tm.edit(content = formated_content, embeds = after.embeds)
+        self.locked_messages.remove(before)
             
 
     channel = discord.SlashCommandGroup("sharecode", locale_class.get('desc'))

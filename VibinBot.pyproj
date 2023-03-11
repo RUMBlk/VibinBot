@@ -23,8 +23,8 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="channel.py" />
     <Compile Include="database.py" />
+    <Compile Include="sharecode.py" />
     <Compile Include="society.py" />
     <Compile Include="keepalive.py" />
     <Compile Include="minecraft.py" />
