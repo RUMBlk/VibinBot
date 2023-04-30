@@ -39,7 +39,6 @@ async def format(bot, content, reference = None, attachments = None, timeformats
         for match in timeformats:
             timestamp = int(datetime.datetime.now(timezone.utc).replace(hour = 0, minute = 0, second = 0, microsecond = 0).timestamp())
             match = match[0]
-            print(match)
             tf_split = match.split(':')
             for i in range(len(tf_split)):
                 murica = 'AM'.lower() in tf_split[-1].lower() or 'PM'.lower() in tf_split[-1].lower()
@@ -56,7 +55,6 @@ async def format(bot, content, reference = None, attachments = None, timeformats
                         timestamp += int(tf_split[i][0])*3600
                 elif i == 1: timestamp += int(tf_split[i])*60
             content = content.replace(f'<{match}>', f'<t:{timestamp}:t>')
-            print(content)
 
     ids = re.findall(r'(?<=\<@)[0-9]+(?=\>)', content)
     for id in ids:
@@ -93,7 +91,6 @@ class filter(commands.Cog):
                     content = message.content
                     timeregex = r'<(((((([0-9]|0[0-9]|1[0-2]):([0-5][0-9]))|([0-9]|0[0-9]|1[0-2]))( am| pm|am|pm| AM| PM|AM|PM))|(([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])))(((\+|\-)([0-9][0-9]|[0-9]))|))>'
                     timeformats = re.findall(timeregex, message.content) #:fumbo:
-                    print(timeformats)
                     if timeformats != []:
                         for i in range(len(timeformats)):
                             if not('+' in timeformats[i][0] or '-' in timeformats[i][0]):
