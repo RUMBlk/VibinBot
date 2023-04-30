@@ -24,6 +24,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="database.py" />
+    <Compile Include="messages.py" />
     <Compile Include="sharecode.py" />
     <Compile Include="society.py" />
     <Compile Include="keepalive.py" />

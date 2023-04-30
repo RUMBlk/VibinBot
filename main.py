@@ -17,6 +17,7 @@ import moderation
 import elections
 import sharecode
 import localisation as loc
+import messages
 
 logging.basicConfig(level=logging.INFO)
 
@@ -50,6 +51,7 @@ bot.add_cog(moderation.moderation(bot))
 bot.add_cog(society.society(bot))
 bot.add_cog(elections.electionsCog(bot))
 bot.add_cog(sharecode.sharecode(bot))
+bot.add_cog(messages.filter(bot))
 #Minecraft cogs
 #bot.add_cog(minecraft.init(bot)) #init cog loads other Minecraft cogs
 

@@ -35,6 +35,7 @@ class members(BaseModel):
     UserID = BigIntegerField()
     msg_count = IntegerField(default = 0)
     Points = IntegerField(default = 0)
+    Timezone = CharField(default = '')
 
 #class role_tags(BaseModel):
 #    id = PrimaryKeyField()

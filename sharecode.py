@@ -9,6 +9,7 @@ import os
 import re
 from hashlib import sha256
 import asyncio
+import messages
 
 async def hashtag(name, mention, salt = os.getenv('salt')):
     if salt is not None: mention = mention+salt
@@ -20,50 +21,6 @@ async def hashtag(name, mention, salt = os.getenv('salt')):
         lat4 += chr(num)
     return f'{name}#{lat4}'
 
-async def attachments_to_url(attachments):
-    urls = ''
-    for item in attachments:
-        urls += f'{item.url}\n'
-    return urls[:-1]
-
-async def format(bot, content, reference = None, attachments = None):
-    if hasattr(reference, 'message_id'):
-        channel = await bot.fetch_channel(reference.channel_id)
-        reference = await channel.fetch_message(reference.message_id)
-        refname = reference.author.display_name
-        if reference.is_system is True: tag = f'{refname}[SYSTEM]'
-        elif reference.author.bot is False: tag = await hashtag(refname, reference.author.mention)
-        else: tag = f'{refname}[B]'
-        reply = f'> >**{tag}**: '
-        if reference.content != '':
-            reply_len = 80-len(reply)
-            reply_content = re.sub(r'> >.*\n', '', reference.content, 1)[:reply_len].split('\n')[0]
-            if len(reference.content) > reply_len: reply_content = f'{reply_content[:-3]}...'
-        else: reply_content = 'Attachment(s) or/and embed(s)'
-        content = f'{reply}{reply_content}\n{content}'
-    if attachments != []:
-        urls = await attachments_to_url(attachments)
-        if content != '': content = f'{content}\n{urls}'
-        else: content = urls
-
-    ids = re.findall(r'(?<=\<@)[0-9]+(?=\>)', content)
-    for id in ids:
-        mention = f'<@{id}>'
-        try:
-            user = await bot.fetch_user(id)
-            tag = await hashtag(user.display_name, mention)
-        except:
-            tag = await hashtag('UnknownUser', mention)
-        content = content.replace(mention, f'**{tag}**')
-
-    content = re.sub(r'<@&[0-9]*>', '**[role]**', content)
-
-    mention_blacklist = ['@everyone', '@here']
-    for mention in mention_blacklist:
-        content = content.replace(mention, f'**{mention[1:]}**')
-    #a   
-    return content
-
 async def transmit(bot, message = None, sender = None, content = None, embeds = [], mimic = True):
     author_id = None
     if message is not None: 
@@ -73,24 +30,23 @@ async def transmit(bot, message = None, sender = None, content = None, embeds = 
 
         if content is None: content = message.content
         if embeds is None: embeds = message.embeds
-        content = await format(bot, content, message.reference, message.attachments)
+        content = await messages.format(bot, content, message.reference, message.attachments)
     else: mimic = False
 
     webhooks = await sender.webhooks()
     webhook = discord.utils.get(webhooks, name = bot.user.name)
     if webhook is None: webhook = await sender.create_webhook(name=bot.user.name, reason = "Required for the bot to execute share code network commands!")
-    if author_id != webhook.id:
-        channelDB = db.channels.get_or_create(ChannelID = sender.id)[0]
-        network = db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.shareCode != None) & (db.channels.ChannelID != sender.id))
-        if network is not None:
-            for item in network:
-                channel = bot.get_channel(item.ChannelID)
-                webhooks = await channel.webhooks()
-                webhook = discord.utils.get(webhooks, name = bot.user.name) #await get_webhook(webhooks, bot.user.name)
+    channelDB = db.channels.get_or_create(ChannelID = sender.id)[0]
+    network = db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.shareCode != None) & (db.channels.ChannelID != sender.id))
+    if network is not None:
+        for item in network:
+            channel = bot.get_channel(item.ChannelID)
+            webhooks = await channel.webhooks()
+            webhook = discord.utils.get(webhooks, name = bot.user.name) #await get_webhook(webhooks, bot.user.name)
 
-                if webhook is None: webhook = await channel.create_webhook(name=bot.user.name, reason = "Required for the bot to execute share code network commands!")
-                if mimic is False: await webhook.send(content = content, embeds = embeds, avatar_url = bot.user.display_avatar)
-                else: await webhook.send(content = content, embeds = embeds, username = tag, avatar_url = message.author.display_avatar)
+            if webhook is None: webhook = await channel.create_webhook(name=bot.user.name, reason = "Required for the bot to execute share code network commands!")
+            if mimic is False: await webhook.send(content = content, embeds = embeds, avatar_url = bot.user.display_avatar)
+            else: await webhook.send(content = content, embeds = embeds, username = tag, avatar_url = message.author.display_avatar)
 
 class transmitted():
     webhook = None
@@ -102,18 +58,17 @@ class transmitted():
         webhooks = await message.channel.webhooks()
         webhook = discord.utils.get(webhooks, name = bot.user.name)
         if webhook is not None: webhook = webhook.id
-        if message.author.id != webhook:
-            tag = await hashtag(message.author.name, message.author.mention)
-            tag = tag.split('#')[-1]
-            channelDB = db.channels.get_or_create(ChannelID = message.channel.id)[0]
-            network = db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.shareCode != None) & (db.channels.ChannelID != message.channel.id))
-            if network is not None:
-                formated_content = await format(bot, message.content, message.reference, message.attachments)
-                for item in network:
-                    channel = self.bot.get_channel(item.ChannelID)
-                    webhooks = await channel.webhooks()
-                    self.webhook = discord.utils.get(webhooks, name = self.bot.user.name)
-                    self.fetchedMessage = await channel.history(around = message.created_at, limit=11).find(lambda m: f'#{tag}' in m.author.name and m.content == formated_content) 
+        tag = await hashtag(message.author.name, message.author.mention)
+        tag = tag.split('#')[-1]
+        channelDB = db.channels.get_or_create(ChannelID = message.channel.id)[0]
+        network = db.channels.select().where((db.channels.shareCode == channelDB.shareCode) & (db.channels.shareCode != None) & (db.channels.ChannelID != message.channel.id))
+        if network is not None:
+            formated_content = await messages.format(bot, message.content, message.reference, message.attachments)
+            for item in network:
+                channel = self.bot.get_channel(item.ChannelID)
+                webhooks = await channel.webhooks()
+                self.webhook = discord.utils.get(webhooks, name = self.bot.user.name)
+                self.fetchedMessage = await channel.history(around = message.created_at, limit=11).find(lambda m: f'#{tag}' in m.author.name and m.content == formated_content) 
 
         return self
         
@@ -162,7 +117,7 @@ class sharecode(commands.Cog):
         self.locked_messages.append(before)
         if isinstance(before.channel, discord.TextChannel) and before.channel.permissions_for(before.guild.me).manage_webhooks:
             tm = await transmitted().fetch(self.bot, before)
-            formated_content = await format(self.bot, after.content, after.reference, after.attachments)
+            formated_content = await messages.format(self.bot, after.content, after.reference, after.attachments)
             await tm.edit(content = formated_content, embeds = after.embeds)
         self.locked_messages.remove(before)
             

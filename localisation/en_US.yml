@@ -95,7 +95,7 @@ sharecode:
   desc: "Share code related commands"
   generate:
     desc: "Generate and set the code"
-    success: "The code has been successfully generated: ```{shareCode}```\n Use /channel shareCode_set command to connect more channels to the network"
+    success: "The code has been successfully generated: ```{shareCode}```\n Use /sharecode set command to connect more channels to the network"
   set:
     success: "The code has been successfully applied!"
     exists: "The code is already set!"
@@ -107,6 +107,15 @@ sharecode:
     fail: "You're not author of the message!"
   on_join: "{guild} #{channel} has joined the network!"
   on_left: "{guild} #{channel} has left the network!"
+
+#msg filter
+message_filter:
+  desc: "Filter configuration commands"
+  timezone: 
+    desc: "Specify your timezone for the time filter"
+    timezone_limit_error: "The timezone must be a number with + or - at beginning. Examples: +3; -8; +10; -12"
+    success: "The timezone has been successfuly set in the server!"
+
 
 ####################################################################################################
 
