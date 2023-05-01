@@ -52,7 +52,7 @@ class society(commands.Cog):
     @commands.Cog.listener("on_message")
     async def on_message(self, message):
         if message.author.bot is False:
-            guild = db.guilds.get(GuildID = message.guild.id)
+            guild = db.guilds.get_or_create(GuildID = message.guild.id)[0]
             author = db.members.get_or_create(GuildID = guild.id, UserID = message.author.id)[0]
             reward = 0
             author.msg_count += 1

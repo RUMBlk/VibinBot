@@ -91,6 +91,7 @@ class filter(commands.Cog):
                     content = message.content
                     timeregex = r'<(((((([0-9]|0[0-9]|1[0-2]):([0-5][0-9]))|([0-9]|0[0-9]|1[0-2]))( am| pm|am|pm| AM| PM|AM|PM))|(([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])))(((\+|\-)([0-9][0-9]|[0-9]))|))>'
                     timeformats = re.findall(timeregex, message.content) #:fumbo:
+                    print(timeformats)
                     if timeformats != []:
                         for i in range(len(timeformats)):
                             if not('+' in timeformats[i][0] or '-' in timeformats[i][0]):
@@ -116,5 +117,6 @@ class filter(commands.Cog):
             authorDB = db.members.get_or_create(GuildID = guildDB.id, UserID = ctx.author.id)[0]
             authorDB.Timezone = timezone[:3]
             authorDB.save()
+            print(authorDB.Timezone)
             answer = locale_func.get('success')
         await ctx.respond(content = answer, ephemeral = True)
