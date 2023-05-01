@@ -113,7 +113,7 @@ class filter(commands.Cog):
         if re.findall(r'(((\+|\-)([0-9][0-9]|[0-9])))', timezone[:3]) == []:
             answer = locale_func.get('timezone_limit_error')
         else:
-            authorDB = db.members.get_or_create(GuildID = ctx.guild.id, UserID = ctx.author.id)[0]
+            authorDB = db.members.get_or_create(GuildID = guildDB.id, UserID = ctx.author.id)[0]
             authorDB.Timezone = timezone[:3]
             authorDB.save()
             answer = locale_func.get('success')
