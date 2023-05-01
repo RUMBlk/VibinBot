@@ -82,28 +82,26 @@ class filter(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def on_message(self, message):
-        if message.author != self.bot.user:
-            if message.channel.permissions_for(message.guild.me).manage_webhooks and message.channel.permissions_for(message.guild.me).manage_messages and not message.author.bot:
-                webhooks = await message.channel.webhooks()
-                webhook = discord.utils.get(webhooks, name = self.bot.user.name) #await get_webhook(webhooks, bot.user.name)
-                if webhook is None: webhook = await message.channel.create_webhook(name=self.bot.user.name, reason = "Required for the bot to execute share code network commands!")
-                if message.author.id != webhook:
-                    content = message.content
-                    timeregex = r'<(((((([0-9]|0[0-9]|1[0-2]):([0-5][0-9]))|([0-9]|0[0-9]|1[0-2]))( am| pm|am|pm| AM| PM|AM|PM))|(([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])))(((\+|\-)([0-9][0-9]|[0-9]))|))>'
-                    timeformats = re.findall(timeregex, message.content) #:fumbo:
-                    print(timeformats)
-                    if timeformats != []:
-                        for i in range(len(timeformats)):
-                            if not('+' in timeformats[i][0] or '-' in timeformats[i][0]):
-                                timeformats[i] = list(timeformats[i])
-                                authorDB = db.members.get_or_none(db.members.GuildID == message.guild.id, db.members.UserID == message.author.id)
-                                if authorDB is not None:
-                                   content = content.replace(timeformats[i][0], timeformats[i][0]+authorDB.Timezone)
-                                   timeformats[i][0] += authorDB.Timezone
-                        content = await format(self.bot, content, message.reference, message.attachments, timeformats)
-                        msg = await webhook.send(content, embeds = message.embeds, username = await sharecode.hashtag(message.author.display_name, message.author.mention), avatar_url = message.author.display_avatar, wait=True)
-                        await message.delete()
-                        await sharecode.transmit(self.bot, msg, msg.author, msg.content, msg.embeds)
+        if message.channel.permissions_for(message.guild.me).manage_webhooks and message.channel.permissions_for(message.guild.me).manage_messages and not message.author.bot:
+            webhooks = await message.channel.webhooks()
+            webhook = discord.utils.get(webhooks, name = self.bot.user.name) #await get_webhook(webhooks, bot.user.name)
+            if webhook is None: webhook = await message.channel.create_webhook(name=self.bot.user.name, reason = "Required for the bot to execute share code network commands!")
+            if message.author.id != webhook:
+                content = message.content
+                timeregex = r'<(((((([0-9]|0[0-9]|1[0-2]):([0-5][0-9]))|([0-9]|0[0-9]|1[0-2]))( am| pm|am|pm| AM| PM|AM|PM))|(([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])))(((\+|\-)([0-9][0-9]|[0-9]))|))>'
+                timeformats = re.findall(timeregex, message.content) #:fumbo:
+                if timeformats != []:
+                    for i in range(len(timeformats)):
+                        if not('+' in timeformats[i][0] or '-' in timeformats[i][0]):
+                            timeformats[i] = list(timeformats[i])
+                            authorDB = db.members.get_or_none(db.members.GuildID == message.guild.id, db.members.UserID == message.author.id)
+                            if authorDB is not None:
+                                content = content.replace(timeformats[i][0], timeformats[i][0]+authorDB.Timezone)
+                                timeformats[i][0] += authorDB.Timezone
+                    content = await format(self.bot, content, message.reference, message.attachments, timeformats)
+                    msg = await webhook.send(content, embeds = message.embeds, username = await sharecode.hashtag(message.author.display_name, message.author.mention), avatar_url = message.author.display_avatar, wait=True)
+                    await message.delete()
+                    await sharecode.transmit(self.bot, msg, msg.author, msg.content, msg.embeds)
 
     message_filter = discord.SlashCommandGroup("message_filter", locale_class.get('desc'))
     @message_filter.command(description = locale_class.get('desc'))
@@ -117,6 +115,5 @@ class filter(commands.Cog):
             authorDB = db.members.get_or_create(GuildID = guildDB.id, UserID = ctx.author.id)[0]
             authorDB.Timezone = timezone[:3]
             authorDB.save()
-            print(authorDB.Timezone)
             answer = locale_func.get('success')
         await ctx.respond(content = answer, ephemeral = True)
