@@ -105,7 +105,7 @@ class electionsCog(commands.Cog):
         guildDB = db.guilds.get_or_create(GuildID = ctx.guild.id)[0]
         locale = loc.locale(guildDB.locale)
         locale_func = locale.get('elections').get('add')
-        req_perms = locale.get('permissions').get('send_messages') + ' and ' + locale('permissions').get('manage_roles')
+        req_perms = locale.get('permissions').get('send_messages') + ' and ' + locale.get('permissions').get('manage_roles')
         if not (ctx.guild.me.guild_permissions.manage_roles) or not (ctx.guild.me.guild_permissions.send_messages): answer = locale('bot_denied').format_map({'permission': req_perms})
         elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied').format_map({'permission': locale.get('permissions').get('owner')})
         else:
@@ -124,7 +124,7 @@ class electionsCog(commands.Cog):
         locale = loc.locale(guildDB.locale)
         locale_class = locale.get('elections')
         locale_func = locale_class.get('delete')
-        req_perms = locale('permissions').get('send_messages') + ' and ' + locale('permissions').get('manage_roles')
+        req_perms = locale.get('permissions').get('send_messages') + ' and ' + locale.get('permissions').get('manage_roles')
         if not (ctx.guild.me.guild_permissions.manage_roles) or not (ctx.guild.me.guild_permissions.send_messages): answer = locale('bot_denied').format_map({'permission': req_perms})
         elif ctx.author != ctx.guild.owner: answer = locale_func.get('user_denied').format_map({'permission': locale.get('permissions').get('owner')})
         else:
@@ -167,11 +167,11 @@ class electionsCog(commands.Cog):
         locale = loc.locale(guildDB.locale)
         locale_class = locale.get('elections')
         locale_func = locale_class.get('unclaim')
-        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied')
+        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale.get('bot_denied')
         else:
             memberDB = db.members.get_or_create(GuildID = guildDB.id, UserID = ctx.author.id)[0]
             db_group = await get_claimer_group(guildDB, role, memberDB)
-            if db_group['electionDB'] is None: locale_class.get('no_such_elections')
+            if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
             elif db_group['claimerDB'] is None: answer = locale_func.get('not_candidate')
             else:
                 claimDB = claimers.get_or_none(claimers.ElectID == db_group['electionDB'].id, claimers.UserID == memberDB.id)
@@ -188,7 +188,7 @@ class electionsCog(commands.Cog):
         locale = loc.locale(guildDB.locale)
         locale_class = locale.get('elections')
         locale_func = locale_class.get('support')
-        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied')
+        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale.get('bot_denied')
         else:
             authorDB = db.members.get_or_create(GuildID = guildDB.id, UserID = ctx.author.id)[0]
             memberDB = db.members.get_or_none(db.members.GuildID == guildDB.id, db.members.UserID == claimer.id)
@@ -197,9 +197,10 @@ class electionsCog(commands.Cog):
                 db_group = await get_support_group(guildDB, role, memberDB, authorDB)
                 if db_group['electionDB'] is None: answer = locale_class.get('no_such_elections')
                 elif db_group['claimerDB'] is None: answer = locale_class.get('not_candidate')
-                elif db_group['supportDB'] is not None: locale_func.get("exists")
+                elif db_group['supportDB'] is not None: answer = locale_func.get("exists")
                 else:
-                    db_group['claimerDB'].Points += memberDB.Points
+                    supporters.create(UserID = authorDB.id, Claimer = db_group['claimerDB'].id)
+                    db_group['claimerDB'].Points += authorDB.Points
                     db_group['claimerDB'].save()
                     await elect(ctx.guild, db_group['electionDB'], guildDB)
                     answer = locale_func.get('success')
@@ -211,7 +212,7 @@ class electionsCog(commands.Cog):
         locale = loc.locale(guildDB.locale)
         locale_class = locale.get('elections')
         locale_func = locale_class.get('unsupport')
-        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied')
+        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale.get('bot_denied')
         else:
             authorDB = db.members.get_or_create(GuildID = guildDB.id, UserID = ctx.author.id)[0]
             memberDB = db.members.get_or_none(db.members.GuildID == guildDB.id, db.members.UserID == claimer.id)
