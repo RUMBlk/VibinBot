@@ -51,5 +51,5 @@ class moderation(commands.Cog):
         to_react = await channel.send(content = reported_content, embeds = message.embeds)
         await to_react.add_reaction('✅')
             #await channel.send(content=locale().get(f'{status}report', guild.locale).format_map({'author_id': message.author.id, 'reported_content': message.content}))
-        await ctx.respond(content = locale.get(locale_func.get('success')))
+        await ctx.respond(content = locale.get(locale_func.get('success')), ephemeral = True)
 

@@ -150,7 +150,7 @@ class electionsCog(commands.Cog):
         locale = loc.locale(guildDB.locale)
         locale_class = locale.get('elections')
         locale_func = locale_class.get('claim')
-        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale('bot_denied')
+        if not (ctx.guild.me.guild_permissions.manage_roles): answer = locale.get('bot_denied')
         else:
             memberDB = db.members.get_or_create(GuildID = guildDB.id, UserID = ctx.author.id)[0]
             db_group = await get_claimer_group(guildDB, role, memberDB)
